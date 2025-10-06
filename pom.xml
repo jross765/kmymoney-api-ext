@@ -6,12 +6,12 @@
 	<parent>
 		<groupId>org.kmymoney</groupId>
 		<artifactId>kmymoney</artifactId>
-		<version>0.8.0</version>
+		<version>0.9</version>
 	</parent>
 
 	<artifactId>kmymoney-api-ext</artifactId>
-
 	<name>${project.title} : API Extensions</name>
+	<version>0.8.0</version>
 
 	<properties>
 
