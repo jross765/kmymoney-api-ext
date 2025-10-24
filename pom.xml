@@ -11,7 +11,7 @@
 
 	<artifactId>kmymoney-api-ext</artifactId>
 	<name>${project.title} : API Extensions</name>
-	<version>0.8.0</version>
+	<version>0.8.1</version>
 
 	<properties>
 
@@ -37,7 +37,7 @@
 			<dependency>
 				<groupId>org.kmymoney</groupId>
 				<artifactId>kmymoney-base</artifactId>
-				<version>0.8.0</version>
+				<version>0.8.1</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -74,7 +74,7 @@
 		<dependency>
 			<groupId>org.kmymoney</groupId>
 			<artifactId>kmymoney-base</artifactId>
-			<version>0.8.0</version>
+			<version>0.8.1</version>
 			<scope>compile</scope>
 		</dependency>
 
