@@ -66,7 +66,7 @@ public class TransactionFinder {
 		}
 		
 		for ( KMyMoneyTransaction trx : candList ) {
-			if ( flt.matchesCriteria(trx, withSplits, splitLogic) ) {
+			if ( flt.matchesCriteria(trx, true, withSplits, splitLogic) ) {
 				result.add(trx);
 			}
 		}

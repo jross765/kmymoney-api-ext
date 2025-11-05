@@ -28,6 +28,9 @@ public class TransactionFilter {
 	public LocalDate datePostedFrom;
 	public LocalDate datePostedTo;
 	
+	public LocalDate dateEnteredFrom;
+	public LocalDate dateEnteredTo;
+	
 	public int nofSpltFrom;
 	public int nofSpltTo;
 
@@ -58,6 +61,14 @@ public class TransactionFilter {
 			e.printStackTrace();
 		}
 		
+		try {
+			dateEnteredFrom = LocalDateHelpers.parseLocalDate(LocalDateHelpers.DATE_UNSET, DateHelpers.DATE_FORMAT_1);
+			dateEnteredTo   = LocalDateHelpers.parseLocalDate(LocalDateHelpers.DATE_UNSET, DateHelpers.DATE_FORMAT_1);
+		} catch (Exception e) {
+			// pro forma, de facto unreachable
+			e.printStackTrace();
+		}
+		
 		nofSpltFrom = NOF_SPLT_UNSET;
 		nofSpltTo   = NOF_SPLT_UNSET;
 
@@ -79,6 +90,14 @@ public class TransactionFilter {
 			e.printStackTrace();
 		}
 		
+		try {
+			dateEnteredFrom = LocalDateHelpers.parseLocalDate(LocalDateHelpers.DATE_UNSET, DateHelpers.DATE_FORMAT_1);
+			dateEnteredTo   = LocalDateHelpers.parseLocalDate(LocalDateHelpers.DATE_UNSET, DateHelpers.DATE_FORMAT_1);
+		} catch (Exception e) {
+			// pro forma, de facto unreachable
+			e.printStackTrace();
+		}
+		
 		nofSpltFrom = NOF_SPLT_UNSET;
 		nofSpltTo   = NOF_SPLT_UNSET;
 
@@ -92,7 +111,14 @@ public class TransactionFilter {
 	// ---------------------------------------------------------------
 	
 	public boolean matchesCriteria(final KMyMoneyTransaction trx,
-			                       final boolean withSplits,
+            final boolean withSplits,
+            final SplitLogic splitLogic) {
+		return matchesCriteria(trx, true, withSplits, splitLogic);
+	}
+	
+	public boolean matchesCriteria(final KMyMoneyTransaction trx,
+								   final boolean datePostedAlreadyFiltered,
+								   final boolean withSplits,
 			                       final SplitLogic splitLogic) {
 		
 		if ( trx == null ) {
@@ -106,18 +132,38 @@ public class TransactionFilter {
 //			}
 //		}
 
-		if ( isDatePostedFromSet() ) {
-			if ( trx.getDatePosted().isBefore(datePostedFrom) ) {
+		// ---
+		
+		if ( ! datePostedAlreadyFiltered ) {
+			if ( isDatePostedFromSet() ) {
+				if ( trx.getDatePosted().isBefore(datePostedFrom) ) {
+					return false;
+				}
+			}
+			
+			if ( isDatePostedToSet() ) {
+				if ( trx.getDatePosted().isAfter(datePostedTo) ) {
+					return false;
+				}
+			}
+		}
+		
+		// ---
+			
+		if ( isDateEnteredFromSet() ) {
+			if ( trx.getDateEntered().isBefore(dateEnteredFrom) ) {
 				return false;
 			}
 		}
 		
-		if ( isDatePostedToSet() ) {
-			if ( trx.getDatePosted().isAfter(datePostedTo) ) {
+		if ( isDateEnteredToSet() ) {
+			if ( trx.getDateEntered().isAfter(dateEnteredTo) ) {
 				return false;
 			}
 		}
 			
+		// ---
+		
 		if ( nofSpltFrom != NOF_SPLT_UNSET ) {
 			if ( trx.getSplitsCount() < nofSpltFrom ) {
 				return false;
@@ -130,11 +176,15 @@ public class TransactionFilter {
 			}
 		}
 		
+		// ---
+		
 		if ( ! memoPart.trim().equals("") ) {
 			if ( ! trx.getMemo().contains(memoPart.trim()) ) {
 				return false;
 			}
 		}
+		
+		// ---------
 		
 		// 2) Split Level
 		if ( withSplits ) {
@@ -206,6 +256,37 @@ public class TransactionFilter {
 		return true; // Compiler happy
 	}
 	
+	// ----------------------------
+	// helpers
+
+	public boolean isDateEnteredFromSet() {
+		try {
+			if ( dateEnteredFrom.equals( LocalDateHelpers.parseLocalDate(LocalDateHelpers.DATE_UNSET, DateHelpers.DATE_FORMAT_1) ) )
+				return false;
+			else			
+				return true;
+		} catch (Exception e) {
+			// pro forma, de facto unreachable
+			e.printStackTrace();
+		}
+		
+		return true; // Compiler happy
+	}
+
+	public boolean isDateEnteredToSet() {
+		try {
+			if ( dateEnteredTo.equals( LocalDateHelpers.parseLocalDate(LocalDateHelpers.DATE_UNSET, DateHelpers.DATE_FORMAT_1) ) )
+				return false;
+			else			
+				return true;
+		} catch (Exception e) {
+			// pro forma, de facto unreachable
+			e.printStackTrace();
+		}
+		
+		return true; // Compiler happy
+	}
+	
 	// ---------------------------------------------------------------
 
 	@Override
@@ -213,9 +294,15 @@ public class TransactionFilter {
 		return "TransactionFilter [" + 
 	              "datePostedFrom=" + datePostedFrom + ( isDatePostedFromSet() ? "" : " (unset)" ) + ", " +
 				    "datePostedTo=" + datePostedTo   + ( isDatePostedToSet()   ? "" : " (unset)" ) + ", " +
+	              
+                 "dateEnteredFrom=" + dateEnteredFrom + ( isDateEnteredFromSet() ? "" : " (unset)" ) + ", " +
+                   "dateEnteredTo=" + dateEnteredTo   + ( isDateEnteredToSet()   ? "" : " (unset)" ) + ", " +
+                 
 	                 "nofSpltFrom=" + nofSpltFrom + ( nofSpltFrom == NOF_SPLT_UNSET ? " (unset)" : "" ) + ", " + 
 				       "nofSpltTo=" + nofSpltTo   + ( nofSpltTo   == NOF_SPLT_UNSET ? " (unset)" : "" ) + ", " +
+	                 
 	                   "memoPart='" + memoPart + "', " +
+	                   
 				        "spltFilt=" + spltFilt + "]";
 	}
 
