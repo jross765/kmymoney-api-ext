@@ -3,8 +3,8 @@ package org.kmymoney.apiext.trxmgr;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.kmymoney.api.read.KMyMoneyFile;
 import org.kmymoney.api.read.KMyMoneyTransactionSplit;
-import org.kmymoney.api.write.KMyMoneyWritableFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,11 +15,11 @@ public class TransactionSplitFinder {
     
     // ---------------------------------------------------------------
     
-	private KMyMoneyWritableFile kmmFile = null;
+	private KMyMoneyFile kmmFile = null;
 	
     // ---------------------------------------------------------------
 	
-	public TransactionSplitFinder(KMyMoneyWritableFile kmmFile) {
+	public TransactionSplitFinder(KMyMoneyFile kmmFile) {
 		if ( kmmFile == null ) {
 			throw new IllegalArgumentException("null KMyMoney-file object given");
 		}
@@ -47,7 +47,7 @@ public class TransactionSplitFinder {
 				result.add(splt);
 			}
 		}
-		
+
 		LOGGER.debug("find: Found " + result.size() + " Transaction-Splits matching filter");
 		return result;
 	}

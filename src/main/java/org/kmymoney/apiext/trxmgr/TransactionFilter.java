@@ -16,6 +16,10 @@ public class TransactionFilter {
 	}
 	
 	// ---------------------------------------------------------------
+	
+	public static final int NOF_SPLT_UNSET = 0;
+	
+	// ---------------------------------------------------------------
 	// Transaction Level
 
 	// ::TODO -- not supported yet
@@ -48,14 +52,14 @@ public class TransactionFilter {
 
 		try {
 			datePostedFrom = LocalDateHelpers.parseLocalDate(LocalDateHelpers.DATE_UNSET, DateHelpers.DATE_FORMAT_1);
-			datePostedTo = LocalDateHelpers.parseLocalDate(LocalDateHelpers.DATE_UNSET, DateHelpers.DATE_FORMAT_1);
+			datePostedTo   = LocalDateHelpers.parseLocalDate(LocalDateHelpers.DATE_UNSET, DateHelpers.DATE_FORMAT_1);
 		} catch (Exception e) {
 			// pro forma, de facto unreachable
 			e.printStackTrace();
 		}
 		
-		nofSpltFrom = 0;
-		nofSpltTo = 0;
+		nofSpltFrom = NOF_SPLT_UNSET;
+		nofSpltTo   = NOF_SPLT_UNSET;
 
 		memoPart = "";
 		
@@ -69,14 +73,14 @@ public class TransactionFilter {
 		
 		try {
 			datePostedFrom = LocalDateHelpers.parseLocalDate(LocalDateHelpers.DATE_UNSET, DateHelpers.DATE_FORMAT_1);
-			datePostedTo = LocalDateHelpers.parseLocalDate(LocalDateHelpers.DATE_UNSET, DateHelpers.DATE_FORMAT_1);
+			datePostedTo   = LocalDateHelpers.parseLocalDate(LocalDateHelpers.DATE_UNSET, DateHelpers.DATE_FORMAT_1);
 		} catch (Exception e) {
 			// pro forma, de facto unreachable
 			e.printStackTrace();
 		}
 		
-		nofSpltFrom = 0;
-		nofSpltTo = 0;
+		nofSpltFrom = NOF_SPLT_UNSET;
+		nofSpltTo   = NOF_SPLT_UNSET;
 
 		memoPart = "";
 		
@@ -114,14 +118,14 @@ public class TransactionFilter {
 			}
 		}
 			
-		if ( nofSpltFrom != 0 ) {
-			if ( trx.getSplits().size() < nofSpltFrom ) {
+		if ( nofSpltFrom != NOF_SPLT_UNSET ) {
+			if ( trx.getSplitsCount() < nofSpltFrom ) {
 				return false;
 			}
 		}
 		
-		if ( nofSpltTo != 0 ) {
-			if ( trx.getSplits().size() > nofSpltTo ) {
+		if ( nofSpltTo != NOF_SPLT_UNSET ) {
+			if ( trx.getSplitsCount() > nofSpltTo ) {
 				return false;
 			}
 		}
@@ -207,10 +211,10 @@ public class TransactionFilter {
 	@Override
 	public String toString() {
 		return "TransactionFilter [" + 
-	              "datePostedFrom=" + datePostedFrom + ", " +
-				    "datePostedTo=" + datePostedTo + ", " +
-	                 "nofSpltFrom=" + nofSpltFrom + ", " +
-				       "nofSpltTo=" + nofSpltTo + ", " +
+	              "datePostedFrom=" + datePostedFrom + ( isDatePostedFromSet() ? "" : " (unset)" ) + ", " +
+				    "datePostedTo=" + datePostedTo   + ( isDatePostedToSet()   ? "" : " (unset)" ) + ", " +
+	                 "nofSpltFrom=" + nofSpltFrom + ( nofSpltFrom == NOF_SPLT_UNSET ? " (unset)" : "" ) + ", " + 
+				       "nofSpltTo=" + nofSpltTo   + ( nofSpltTo   == NOF_SPLT_UNSET ? " (unset)" : "" ) + ", " +
 	                   "memoPart='" + memoPart + "', " +
 				        "spltFilt=" + spltFilt + "]";
 	}

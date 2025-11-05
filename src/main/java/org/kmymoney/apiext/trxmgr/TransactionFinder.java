@@ -4,8 +4,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.kmymoney.api.read.KMyMoneyFile;
 import org.kmymoney.api.read.KMyMoneyTransaction;
-import org.kmymoney.api.write.KMyMoneyWritableFile;
 import org.kmymoney.apiext.Const;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,11 +17,11 @@ public class TransactionFinder {
     
     // ---------------------------------------------------------------
     
-	private KMyMoneyWritableFile kmmFile = null;
+	private KMyMoneyFile kmmFile = null;
 	
     // ---------------------------------------------------------------
 	
-	public TransactionFinder(KMyMoneyWritableFile kmmFile) {
+	public TransactionFinder(KMyMoneyFile kmmFile) {
 		if ( kmmFile == null ) {
 			throw new IllegalArgumentException("null kmymoney-file object given");
 		}
@@ -34,9 +34,9 @@ public class TransactionFinder {
 	// ::TODO
 	// - Have results writable?
     
-	public ArrayList<KMyMoneyTransaction> find(TransactionFilter flt, 
-			                                  boolean withSplits,
-			                                  TransactionFilter.SplitLogic splitLogic) {
+	public ArrayList<KMyMoneyTransaction> find(TransactionFilter flt,
+			                                   boolean withSplits,
+			                                   TransactionFilter.SplitLogic splitLogic) {
 		if ( flt == null ) {
 			throw new IllegalArgumentException("null transaction-filter given");
 		}
