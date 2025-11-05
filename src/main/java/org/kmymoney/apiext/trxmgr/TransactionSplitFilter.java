@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 import org.kmymoney.api.read.KMyMoneyAccount;
 import org.kmymoney.api.read.KMyMoneyTransactionSplit;
+import org.kmymoney.api.read.impl.KMyMoneyTransactionSplitImpl;
 import org.kmymoney.apiext.Const;
 import org.kmymoney.base.basetypes.simple.KMMAcctID;
 import org.kmymoney.base.basetypes.simple.KMMPyeID;
@@ -21,9 +22,8 @@ public class TransactionSplitFilter {
 	
 	// ---------------------------------------------------------------
 
-	public KMyMoneyTransactionSplit.Action      action;
-	// ::TODO -- not supported yet
-	// public KMyMoneyTransactionSplit.ReconStatus reconStatus;
+	public KMyMoneyTransactionSplit.Action action;
+	public KMyMoneyTransactionSplit.State  state;
 	
 	public KMMAcctID            acctID;
 	public KMMPyeID             pyeID;
@@ -51,7 +51,7 @@ public class TransactionSplitFilter {
 	
 	private void init() {
 		action = null;
-		// reconStatus = null;
+		state  = null;
 		
 		acctID = new KMMAcctID();
 		pyeID = new KMMPyeID();
@@ -71,7 +71,7 @@ public class TransactionSplitFilter {
 	
 	public void reset() {
 		action = null;
-		// reconStatus = null;
+		state  = null;
 		
 		acctID.reset();
 		pyeID.reset();
@@ -97,17 +97,35 @@ public class TransactionSplitFilter {
 			throw new IllegalArgumentException("null transaction-split given");
 		}
 		
+		// ---
+		
 		if ( action != null ) {
+			// Important pre-check first:
+			// (alternatively: call getAction() directly and catch MappingException)
+			String actionStr = ((KMyMoneyTransactionSplitImpl) splt).getActionStr();
+			if ( actionStr.trim().equals("") ) {
+				return false;
+			}
+
+			// Core check
 			if ( splt.getAction() != action ) {
 				return false;
 			}
 		}
 		
-//		if ( reconStatus != null ) {
-//			if ( ! splt.getReconStatus().getID().equals(acctID) ) {
-//				return false;
-//			}
-//		}
+		if ( state != null ) {
+			// Important pre-check first:
+			// (alternatively: call getState() directly and catch MappingException)
+			int stateInt = ((KMyMoneyTransactionSplitImpl) splt).getStateInt();
+			if ( stateInt == -1 ) { // ::MAGIC, cf. impl of method getStateInt()
+				return false;
+			}
+
+			// Core check
+			if ( splt.getState() != state ) {
+				return false;
+			}
+		}
 		
 		// ---
 		
@@ -204,7 +222,8 @@ public class TransactionSplitFilter {
 	public String toString() {
 		return "TransactionSplitFilter [" + 
 	                 "action=" + action + ", " +
-				
+				      "state=" + state + ", " +
+				      
 				     "acctID=" + acctID + ", " +
 				      "pyeID=" + pyeID + ", " +
 				     
