@@ -5,9 +5,6 @@ import java.time.LocalDate;
 import org.kmymoney.api.read.KMyMoneyTransaction;
 import org.kmymoney.api.read.KMyMoneyTransactionSplit;
 
-import xyz.schnorxoborx.base.dateutils.DateHelpers;
-import xyz.schnorxoborx.base.dateutils.LocalDateHelpers;
-
 public class TransactionFilter {
 	
 	public enum SplitLogic {
@@ -16,8 +13,9 @@ public class TransactionFilter {
 	}
 	
 	// ---------------------------------------------------------------
-	
-	public static final int NOF_SPLT_UNSET = 0;
+
+	public static final LocalDate DATE_UNSET     = LocalDate.of(1900, 1, 1); // LocalDateHelpers.DATE_UNSET
+	public static final int       NOF_SPLT_UNSET = 0;
 	
 	// ---------------------------------------------------------------
 	// Transaction Level
@@ -53,21 +51,11 @@ public class TransactionFilter {
 	private void init() {
 		// type = null;
 
-		try {
-			datePostedFrom = LocalDateHelpers.parseLocalDate(LocalDateHelpers.DATE_UNSET, DateHelpers.DATE_FORMAT_1);
-			datePostedTo   = LocalDateHelpers.parseLocalDate(LocalDateHelpers.DATE_UNSET, DateHelpers.DATE_FORMAT_1);
-		} catch (Exception e) {
-			// pro forma, de facto unreachable
-			e.printStackTrace();
-		}
+		datePostedFrom  = DATE_UNSET;
+		datePostedTo    = DATE_UNSET;
 		
-		try {
-			dateEnteredFrom = LocalDateHelpers.parseLocalDate(LocalDateHelpers.DATE_UNSET, DateHelpers.DATE_FORMAT_1);
-			dateEnteredTo   = LocalDateHelpers.parseLocalDate(LocalDateHelpers.DATE_UNSET, DateHelpers.DATE_FORMAT_1);
-		} catch (Exception e) {
-			// pro forma, de facto unreachable
-			e.printStackTrace();
-		}
+		dateEnteredFrom = DATE_UNSET;
+		dateEnteredTo   = DATE_UNSET;
 		
 		nofSpltFrom = NOF_SPLT_UNSET;
 		nofSpltTo   = NOF_SPLT_UNSET;
@@ -82,21 +70,11 @@ public class TransactionFilter {
 	public void reset() {
 		// type = null;
 		
-		try {
-			datePostedFrom = LocalDateHelpers.parseLocalDate(LocalDateHelpers.DATE_UNSET, DateHelpers.DATE_FORMAT_1);
-			datePostedTo   = LocalDateHelpers.parseLocalDate(LocalDateHelpers.DATE_UNSET, DateHelpers.DATE_FORMAT_1);
-		} catch (Exception e) {
-			// pro forma, de facto unreachable
-			e.printStackTrace();
-		}
+		datePostedFrom  = DATE_UNSET;
+		datePostedTo    = DATE_UNSET;
 		
-		try {
-			dateEnteredFrom = LocalDateHelpers.parseLocalDate(LocalDateHelpers.DATE_UNSET, DateHelpers.DATE_FORMAT_1);
-			dateEnteredTo   = LocalDateHelpers.parseLocalDate(LocalDateHelpers.DATE_UNSET, DateHelpers.DATE_FORMAT_1);
-		} catch (Exception e) {
-			// pro forma, de facto unreachable
-			e.printStackTrace();
-		}
+		dateEnteredFrom = DATE_UNSET;
+		dateEnteredTo   = DATE_UNSET;
 		
 		nofSpltFrom = NOF_SPLT_UNSET;
 		nofSpltTo   = NOF_SPLT_UNSET;
@@ -111,8 +89,8 @@ public class TransactionFilter {
 	// ---------------------------------------------------------------
 	
 	public boolean matchesCriteria(final KMyMoneyTransaction trx,
-            final boolean withSplits,
-            final SplitLogic splitLogic) {
+            					   final boolean withSplits,
+            					   final SplitLogic splitLogic) {
 		return matchesCriteria(trx, true, withSplits, splitLogic);
 	}
 	
@@ -225,66 +203,37 @@ public class TransactionFilter {
 		return true; // Compiler happy
 	}
 	
-	// -----------------------------------------------------
+	// ---------------------------------------------------------------
 	// helpers
 
 	public boolean isDatePostedFromSet() {
-		try {
-			if ( datePostedFrom.equals( LocalDateHelpers.parseLocalDate(LocalDateHelpers.DATE_UNSET, DateHelpers.DATE_FORMAT_1) ) )
-				return false;
-			else			
-				return true;
-		} catch (Exception e) {
-			// pro forma, de facto unreachable
-			e.printStackTrace();
-		}
-		
-		return true; // Compiler happy
+		if ( datePostedFrom.equals(DATE_UNSET) )
+			return false;
+		else			
+			return true;
 	}
 
 	public boolean isDatePostedToSet() {
-		try {
-			if ( datePostedTo.equals( LocalDateHelpers.parseLocalDate(LocalDateHelpers.DATE_UNSET, DateHelpers.DATE_FORMAT_1) ) )
-				return false;
-			else			
-				return true;
-		} catch (Exception e) {
-			// pro forma, de facto unreachable
-			e.printStackTrace();
-		}
-		
-		return true; // Compiler happy
+		if ( datePostedTo.equals(DATE_UNSET) )
+			return false;
+		else			
+			return true;
 	}
 	
 	// ----------------------------
-	// helpers
 
 	public boolean isDateEnteredFromSet() {
-		try {
-			if ( dateEnteredFrom.equals( LocalDateHelpers.parseLocalDate(LocalDateHelpers.DATE_UNSET, DateHelpers.DATE_FORMAT_1) ) )
-				return false;
-			else			
-				return true;
-		} catch (Exception e) {
-			// pro forma, de facto unreachable
-			e.printStackTrace();
-		}
-		
-		return true; // Compiler happy
+		if ( dateEnteredFrom.equals(DATE_UNSET) )
+			return false;
+		else			
+			return true;
 	}
 
 	public boolean isDateEnteredToSet() {
-		try {
-			if ( dateEnteredTo.equals( LocalDateHelpers.parseLocalDate(LocalDateHelpers.DATE_UNSET, DateHelpers.DATE_FORMAT_1) ) )
-				return false;
-			else			
-				return true;
-		} catch (Exception e) {
-			// pro forma, de facto unreachable
-			e.printStackTrace();
-		}
-		
-		return true; // Compiler happy
+		if ( dateEnteredTo.equals(DATE_UNSET) )
+			return false;
+		else			
+			return true;
 	}
 	
 	// ---------------------------------------------------------------
@@ -292,17 +241,17 @@ public class TransactionFilter {
 	@Override
 	public String toString() {
 		return "TransactionFilter [" + 
-	              "datePostedFrom=" + datePostedFrom + ( isDatePostedFromSet() ? "" : " (unset)" ) + ", " +
-				    "datePostedTo=" + datePostedTo   + ( isDatePostedToSet()   ? "" : " (unset)" ) + ", " +
+	              "datePostedFrom=" + datePostedFrom  + ( isDatePostedFromSet()  ? "" : " (unset)" ) + ", " +
+				    "datePostedTo=" + datePostedTo    + ( isDatePostedToSet()    ? "" : " (unset)" ) + ", " +
 	              
                  "dateEnteredFrom=" + dateEnteredFrom + ( isDateEnteredFromSet() ? "" : " (unset)" ) + ", " +
                    "dateEnteredTo=" + dateEnteredTo   + ( isDateEnteredToSet()   ? "" : " (unset)" ) + ", " +
-                 
+
 	                 "nofSpltFrom=" + nofSpltFrom + ( nofSpltFrom == NOF_SPLT_UNSET ? " (unset)" : "" ) + ", " + 
 				       "nofSpltTo=" + nofSpltTo   + ( nofSpltTo   == NOF_SPLT_UNSET ? " (unset)" : "" ) + ", " +
 	                 
 	                   "memoPart='" + memoPart + "', " +
-	                   
+
 				        "spltFilt=" + spltFilt + "]";
 	}
 

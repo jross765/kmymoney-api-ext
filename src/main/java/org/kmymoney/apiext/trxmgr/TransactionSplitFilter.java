@@ -22,8 +22,8 @@ public class TransactionSplitFilter {
 	
 	// ---------------------------------------------------------------
 
-	public KMyMoneyTransactionSplit.Action action;
-	public KMyMoneyTransactionSplit.State  state;
+	public KMyMoneyTransactionSplit.Action     action;
+	public KMyMoneyTransactionSplit.ReconState reconState;
 	
 	public KMMAcctID            acctID;
 	public KMMPyeID             pyeID;
@@ -51,10 +51,10 @@ public class TransactionSplitFilter {
 	
 	private void init() {
 		action = null;
-		state  = null;
+		reconState = null;
 		
 		acctID = new KMMAcctID();
-		pyeID = new KMMPyeID();
+		pyeID  = new KMMPyeID();
 		
 		acctType = null;
 		
@@ -71,17 +71,17 @@ public class TransactionSplitFilter {
 	
 	public void reset() {
 		action = null;
-		state  = null;
-		
+		reconState  = null;
+
 		acctID.reset();
 		pyeID.reset();
-		
+
 		acctType = null;
-		
+
 		valueFrom = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
 		valueTo   = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
 		valueAbs  = false;
-		
+
 		sharesFrom = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
 		sharesTo   = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
 		sharesAbs  = false;
@@ -113,16 +113,16 @@ public class TransactionSplitFilter {
 			}
 		}
 		
-		if ( state != null ) {
+		if ( reconState != null ) {
 			// Important pre-check first:
-			// (alternatively: call getState() directly and catch MappingException)
-			int stateInt = ((KMyMoneyTransactionSplitImpl) splt).getStateInt();
-			if ( stateInt == -1 ) { // ::MAGIC, cf. impl of method getStateInt()
+			// (alternatively: call getReconState() directly and catch MappingException)
+			int reconStateInt = ((KMyMoneyTransactionSplitImpl) splt).getReconStateInt();
+			if ( reconStateInt == -1 ) { // ::MAGIC, cf. impl of method getReconStateInt()
 				return false;
 			}
 
 			// Core check
-			if ( splt.getState() != state ) {
+			if ( splt.getReconState() != reconState ) {
 				return false;
 			}
 		}
@@ -222,21 +222,21 @@ public class TransactionSplitFilter {
 	public String toString() {
 		return "TransactionSplitFilter [" + 
 	                 "action=" + action + ", " +
-				      "state=" + state + ", " +
-				      
+				"recon-state=" + reconState + ", " +
+
 				     "acctID=" + acctID + ", " +
 				      "pyeID=" + pyeID + ", " +
 				     
 	               "acctType=" + acctType + ", " +
-	               
+
 				  "valueFrom=" + valueFrom + ( valueFrom.getBigDecimal().doubleValue() == Const.UNSET_VALUE ? " (unset)" : "" ) + ", " +
 	                "valueTo=" + valueTo   + ( valueTo  .getBigDecimal().doubleValue() == Const.UNSET_VALUE ? " (unset)" : "" ) + ", " +
 	               "valueAbs=" + valueAbs + ", " +
-				  
+
 			     "sharesFrom=" + sharesFrom + ( sharesFrom.getBigDecimal().doubleValue() == Const.UNSET_VALUE ? " (unset)" : "" ) + ", " + 
 	               "sharesTo=" + sharesTo   + ( sharesTo  .getBigDecimal().doubleValue() == Const.UNSET_VALUE ? " (unset)" : "" ) + ", " +
 	              "sharesAbs=" + sharesAbs + ", " +
-	               
+
 			       "memoPart='" + memoPart + "']";
 	}
 
