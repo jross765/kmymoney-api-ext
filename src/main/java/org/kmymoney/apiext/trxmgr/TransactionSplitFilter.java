@@ -13,13 +13,6 @@ import xyz.schnorxoborx.base.numbers.FixedPointNumber;
 
 public class TransactionSplitFilter {
 
-	// ::TODO
-//	public enum DebitCredit {
-//		DEBIT,
-//		CREDIT,
-//		UNDEFINED
-//	}
-	
 	// ---------------------------------------------------------------
 
 	public KMyMoneyTransactionSplit.Action     action;
@@ -100,7 +93,7 @@ public class TransactionSplitFilter {
 		// ---
 		
 		if ( action != null ) {
-			// Important pre-check first:
+			// Pre-check first:
 			// (alternatively: call getAction() directly and catch MappingException)
 			String actionStr = ((KMyMoneyTransactionSplitImpl) splt).getActionStr();
 			if ( actionStr.trim().equals("") ) {
@@ -114,7 +107,7 @@ public class TransactionSplitFilter {
 		}
 		
 		if ( reconState != null ) {
-			// Important pre-check first:
+			// Pre-check first:
 			// (alternatively: call getReconState() directly and catch MappingException)
 			int reconStateInt = ((KMyMoneyTransactionSplitImpl) splt).getReconStateInt();
 			if ( reconStateInt == -1 ) { // ::MAGIC, cf. impl of method getReconStateInt()
@@ -208,7 +201,11 @@ public class TransactionSplitFilter {
 		// ---
 		
 		if ( ! memoPart.trim().equals("") ) {
-			if ( ! splt.getMemo().contains(memoPart.trim()) ) {
+			if ( splt.getMemo() != null ) {
+				if ( ! splt.getMemo().toLowerCase().contains(memoPart.trim().toLowerCase()) ) {
+					return false;
+				}
+			} else {
 				return false;
 			}
 		}

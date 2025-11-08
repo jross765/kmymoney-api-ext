@@ -93,7 +93,7 @@ public class TransactionFilter {
             					   final SplitLogic splitLogic) {
 		return matchesCriteria(trx, true, withSplits, splitLogic);
 	}
-	
+
 	public boolean matchesCriteria(final KMyMoneyTransaction trx,
 								   final boolean datePostedAlreadyFiltered,
 								   final boolean withSplits,
@@ -157,7 +157,11 @@ public class TransactionFilter {
 		// ---
 		
 		if ( ! memoPart.trim().equals("") ) {
-			if ( ! trx.getMemo().contains(memoPart.trim()) ) {
+			if ( trx.getMemo() != null ) {
+				if ( ! trx.getMemo().toLowerCase().contains(memoPart.trim().toLowerCase()) ) {
+					return false;
+				}
+			} else {
 				return false;
 			}
 		}
