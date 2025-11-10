@@ -91,19 +91,21 @@ public class TestTransactionFilter {
 		flt.datePostedTo = LocalDate.of(2023, 10, 27);
 		trx = kmmFile.getTransactionByID(TRX_1_ID);
 		
-		assertEquals(true, flt.matchesCriteria(trx, true, SplitLogic.OR));
+		// Here an in following calls:
+		// Notice the true/false combination of the second/third arg. 
+		assertEquals(true, flt.matchesCriteria(trx, false, true, SplitLogic.OR));
 		
 		flt.datePostedFrom = LocalDate.of(2023, 9, 20);
 		flt.datePostedTo = LocalDate.of(2023, 10, 27);
-		assertEquals(true, flt.matchesCriteria(trx, true, SplitLogic.OR));
+		assertEquals(true, flt.matchesCriteria(trx, false, true, SplitLogic.OR));
 		
 		flt.datePostedFrom = LocalDate.of(2023, 10, 27);
 		flt.datePostedTo = LocalDate.of(2023, 10, 30);
-		assertEquals(true, flt.matchesCriteria(trx, true, SplitLogic.OR));
+		assertEquals(true, flt.matchesCriteria(trx, false, true, SplitLogic.OR));
 		
 		flt.datePostedFrom = LocalDate.of(2023, 10, 30);
 		flt.datePostedTo = LocalDate.of(2023, 10, 27);
-		assertEquals(false, flt.matchesCriteria(trx, true, SplitLogic.OR));
+		assertEquals(false, flt.matchesCriteria(trx, false, true, SplitLogic.OR));
 	}
 
 	/* Doesn't work like that in KMM, as opposed to sister project
