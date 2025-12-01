@@ -27,11 +27,11 @@ public class SecuritiesAccountManager {
     
     public SecuritiesAccountManager(KMyMoneyFile kmmFile, KMMAcctID acctID) {
     	if ( acctID == null ) {
-    		throw new IllegalArgumentException("null account ID given");
+    		throw new IllegalArgumentException("argument <acctID> is null");
     	}
     	
     	if ( ! acctID.isSet() ) {
-    		throw new IllegalArgumentException("unset account ID given");
+    		throw new IllegalArgumentException("argument <acctID> is not set");
     	}
     	
     	invstAcct = kmmFile.getAccountByID(acctID);
@@ -53,11 +53,11 @@ public class SecuritiesAccountManager {
 
 	public void setInvstAcct(KMyMoneyAccount acct) {
     	if ( acct == null ) {
-    		throw new IllegalArgumentException("null account given");
+    		throw new IllegalArgumentException("argument <acct> is null");
     	}
     	
     	if ( acct.getType() != KMyMoneyAccount.Type.INVESTMENT ) {
-    		throw new IllegalArgumentException("account is not of type '" + KMyMoneyAccount.Type.INVESTMENT + "'");
+    		throw new IllegalArgumentException("argument <acct> is not of type '" + KMyMoneyAccount.Type.INVESTMENT + "'");
     	}
 
 		this.invstAcct = acct;

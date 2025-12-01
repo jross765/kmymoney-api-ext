@@ -33,11 +33,11 @@ public class WritableSecuritiesAccountManager extends SecuritiesAccountManager
     	super(kmmFile, acctID);
     	
     	if ( acctID == null ) {
-    		throw new IllegalArgumentException("null account ID given");
+    		throw new IllegalArgumentException("argument <acctID> is null");
     	}
     	
     	if ( ! acctID.isSet() ) {
-    		throw new IllegalArgumentException("unset account ID given");
+    		throw new IllegalArgumentException("argument <acctID> is not set");
     	}
     	
     	wrtblInvstAcct = kmmFile.getWritableAccountByID(acctID);
@@ -62,11 +62,11 @@ public class WritableSecuritiesAccountManager extends SecuritiesAccountManager
 		setInvstAcct(acct);
 		
     	if ( acct == null ) {
-    		throw new IllegalArgumentException("null account given");
+    		throw new IllegalArgumentException("argument <acct> is null");
     	}
     	
     	if ( acct.getType() != KMyMoneyAccount.Type.INVESTMENT ) {
-    		throw new IllegalArgumentException("account is not of type '" + KMyMoneyAccount.Type.INVESTMENT + "'");
+    		throw new IllegalArgumentException("argument <acct> is not of type '" + KMyMoneyAccount.Type.INVESTMENT + "'");
     	}
 
 		this.wrtblInvstAcct = acct;
@@ -77,11 +77,11 @@ public class WritableSecuritiesAccountManager extends SecuritiesAccountManager
 	public KMyMoneyWritableAccount genShareAcct(KMyMoneySecurity sec)
 	{
 		if ( sec == null )
-			throw new IllegalStateException("null security ID given");
+			throw new IllegalStateException("argument <sec> is null");
 		
 		if ( sec.getQualifID().getType() != KMMQualifSecCurrID.Type.SECURITY )
 		{
-			throw new IllegalStateException("given security's ID has wrong type: " + sec.getQualifID().getType());
+			throw new IllegalStateException("argument <sec>'s ID has wrong type: " + sec.getQualifID().getType());
 		}
 		
 		KMyMoneyWritableAccount acct = 
@@ -100,10 +100,10 @@ public class WritableSecuritiesAccountManager extends SecuritiesAccountManager
 	public KMyMoneyWritableAccount genShareAcct(KMMSecID secID)
 	{
 		if ( secID == null )
-			throw new IllegalStateException("null security ID given");
+			throw new IllegalStateException("argument <secID> is null");
 		
 		if ( ! secID.isSet() )
-			throw new IllegalStateException("unset security ID given");
+			throw new IllegalStateException("argument <secID> is not set");
 
 		KMyMoneySecurity sec = wrtblInvstAcct.getWritableKMyMoneyFile().getSecurityByID(secID);
 

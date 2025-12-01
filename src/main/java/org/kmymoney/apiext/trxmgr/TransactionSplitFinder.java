@@ -21,7 +21,7 @@ public class TransactionSplitFinder {
 	
 	public TransactionSplitFinder(KMyMoneyFile kmmFile) {
 		if ( kmmFile == null ) {
-			throw new IllegalArgumentException("null KMyMoney-file object given");
+			throw new IllegalArgumentException("argument <kmmFile> is null");
 		}
 		
 		this.kmmFile = kmmFile;
@@ -34,7 +34,7 @@ public class TransactionSplitFinder {
     
 	public ArrayList<KMyMoneyTransactionSplit> find(TransactionSplitFilter flt) {
 		if ( flt == null ) {
-			throw new IllegalArgumentException("null transaction-split-filter given");
+			throw new IllegalArgumentException("argument <flt> is null");
 		}
 		
 		LOGGER.debug("find: Searching for Transaction-Splits matching filter: " + flt.toString());

@@ -159,52 +159,52 @@ public class SecuritiesAccountTransactionManager {
     		final LocalDate postDate,
     		final String descr) {
     	if ( kmmFile == null ) {
-    		throw new IllegalArgumentException("null KMyMoney file given");
+    		throw new IllegalArgumentException("argument <kmmFile> is null");
     	}
 		
     	if ( stockAcctID == null ||
     		 offsetAcctID == null ) {
-    		throw new IllegalArgumentException("null account ID given");
+    		throw new IllegalArgumentException("argument <stockAcctID> or <offsetAcctID> is null");
     	}
 	
     	if ( ! ( stockAcctID.isSet()  ) ||
     		 ! ( offsetAcctID.isSet() ) ) {
-    		throw new IllegalArgumentException("unset account ID given");
+    		throw new IllegalArgumentException("argument <stockAcctID> or <offsetAcctID> is not set");
     	}
 		
     	if ( expensesAcctAmtList == null ) {
-    		throw new IllegalArgumentException("null expenses account list given");
+    		throw new IllegalArgumentException("argument <expensesAcctAmtList> is null");
     	}
 			
     	if ( expensesAcctAmtList.isEmpty() ) {
-    		throw new IllegalArgumentException("empty expenses account list given");
+    		throw new IllegalArgumentException("argument <expensesAcctAmtList> is empty");
     	}
 			
     	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
     		if ( ! elt.isNotNull() ) {
-    			throw new IllegalArgumentException("null expenses account list element given");
+    			throw new IllegalArgumentException("element of argument <expensesAcctAmtList> is null");
     		}
     		if ( ! elt.isSet() ) {
-    			throw new IllegalArgumentException("unset expenses account list element given");
+    			throw new IllegalArgumentException("element of argument <expensesAcctAmtList> is not set");
     		}
     	}
 
     	if ( nofStocks == null ||
     		 stockPrc == null ) {
-    		throw new IllegalArgumentException("null amount given");
+    		throw new IllegalArgumentException("argument <nofStocks> or <stockPrc> is null");
     	}
 		
     	if ( nofStocks.doubleValue() <= 0.0 ) {
-    		throw new IllegalArgumentException("number of stocks <= 0.0 given");
+    		throw new IllegalArgumentException("argument <nofStocks> is <= 0");
     	}
 			
     	if ( stockPrc.doubleValue() <= 0.0 ) {
-    		throw new IllegalArgumentException("stock price <= 0.0 given");
+    		throw new IllegalArgumentException("argument <stockPrc> is <= 0");
     	}
 	
     	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
     		if ( elt.amount().doubleValue() <= 0.0 ) {
-    			throw new IllegalArgumentException("expense <= 0.0 given");
+    			throw new IllegalArgumentException("element of argument <expensesAcctAmtList> is <= 0.0");
     		}
     	}
 
@@ -374,23 +374,23 @@ public class SecuritiesAccountTransactionManager {
     		final LocalDate postDate,
     		final String descr) {
     	if ( kmmFile == null ) {
-    		throw new IllegalArgumentException("null KMyMoney file given");
+    		throw new IllegalArgumentException("argument <kmmFile> is null");
     	}
 
     	if ( stockAcctID == null ||
     		 incomeAcctID == null ||
     		 offsetAcctID == null ) {
-    		throw new IllegalArgumentException("null account ID given");
+    		throw new IllegalArgumentException("argument <stockAcctID> or <incomeAcctID> or <offsetAcctID> is null");
     	}
 
     	if ( ! ( stockAcctID.isSet() ) ||
     		 ! ( incomeAcctID.isSet() ) ||
     		 ! ( offsetAcctID.isSet() ) ) {
-    		throw new IllegalArgumentException("unset account ID given");
+    		throw new IllegalArgumentException("argument <stockAcctID> or <incomeAcctID> or <offsetAcctID> is not set");
     	}
 
     	if ( expensesAcctAmtList == null ) {
-    		throw new IllegalArgumentException("null expenses account list given");
+    		throw new IllegalArgumentException("argument <expensesAcctAmtList> is null");
     	}
 
     	// CAUTION: Yes, this actually happens in real life, e.g. with specifics 
@@ -402,15 +402,15 @@ public class SecuritiesAccountTransactionManager {
     			
     	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
     		if ( ! elt.isNotNull() ) {
-    			throw new IllegalArgumentException("null expenses account list element given");
+    			throw new IllegalArgumentException("element of argument <expensesAcctAmtList> is null");
     		}
     		if ( ! elt.isSet() ) {
-    			throw new IllegalArgumentException("unset expenses account list element given");
+    			throw new IllegalArgumentException("element of argument <expensesAcctAmtList> is not set");
     		}
     	}
 
     	if ( divDistrGross == null ) {
-    		throw new IllegalArgumentException("null gross dividend/distribution given");
+    		throw new IllegalArgumentException("argument <divDistrGross> is null");
     	}
 
 	// CAUTION: The following two: In fact, this can happen
@@ -558,7 +558,8 @@ public class SecuritiesAccountTransactionManager {
      * @param factor E.g., the number 3.0 for a 3-for-1 split (a threefold increase of the number of shares), 
      * or the number 1/3 (0.333...) for a 1-for-3 reverse stock-split (the number of shares is decreased to a third).
      * 
-     * <em>Caution:</em> The wording is not standardized, at least not internationally: 
+     * <em>Caution:</em> The wording is not standardized, at least not internationally,
+     * and thus prone to misunderstandings:
      * In english-speaking countries, people tend to say "3-for-1" ("3 new shares for 1 old share") 
      * when they mean a threefold-increase of the stocks, whereas in Germany, e.g., it tends
      * to be the other way round, i.e. "Aktiensplit 1:4" ("eine alte zu 4 neuen Aktien") is a 
@@ -581,38 +582,38 @@ public class SecuritiesAccountTransactionManager {
     		final LocalDate postDate,
     		final String descr) {
     	if ( kmmFile == null ) {
-    		throw new IllegalArgumentException("null KMyMoney file given");
+    		throw new IllegalArgumentException("argument <kmmFile> is null");
     	}
 		
     	if ( stockAcctID == null  ) {
-    		throw new IllegalArgumentException("null stock account ID given");
+    		throw new IllegalArgumentException("argument <stockAcctID> is null");
     	}
 	
-    	if ( ! ( stockAcctID.isSet() ) ) {
-    		throw new IllegalArgumentException("unset stock account ID given");
+    	if ( ! stockAcctID.isSet() ) {
+    		throw new IllegalArgumentException("argument <stockAcctID> is not set");
     	}
 		
     	if ( factor == null ) {
-    		throw new IllegalArgumentException("null factor given");
+    		throw new IllegalArgumentException("argument <factor> is null");
     	}
 
     	if ( factor.isNegative() ) {
-    		throw new IllegalArgumentException("negative factor given");
+    		throw new IllegalArgumentException("argument <factor> is < 0");
     	}
 
     	if ( factor.getBigDecimal().equals(BigDecimal.ZERO) ) {
-    		throw new IllegalArgumentException("zero-value factor given");
+    		throw new IllegalArgumentException("argument <factor> is = 0");
     	}
 
     	// ::TODO: Reconsider: Should we really reject the input and throw an exception 
     	// (which is kind of overly strict), or shouldn't we rather just issue a warning?
     	if ( factor.isLessThan(SPLIT_FACTOR_MIN) ) {
-    		throw new IllegalArgumentException("unplausible factor given (smaller than " + SPLIT_FACTOR_MIN + ")");
+    		throw new IllegalArgumentException("argument <factor> has unplausible value (smaller than " + SPLIT_FACTOR_MIN + ")");
     	}
 
     	// ::TODO: cf. above
     	if ( factor.isGreaterThan(SPLIT_FACTOR_MAX) ) {
-    		throw new IllegalArgumentException("unplausible factor given (greater than " + SPLIT_FACTOR_MAX + ")");
+    		throw new IllegalArgumentException("argument <factor> has unplausible value (greater than " + SPLIT_FACTOR_MAX + ")");
     	}
 
     	// ---
@@ -653,7 +654,7 @@ public class SecuritiesAccountTransactionManager {
 	
     	KMyMoneyWritableTransactionSplit splt = trx.createWritableSplit(stockAcct);
     	splt.setValue(new FixedPointNumber());
-    	splt.setShares(new FixedPointNumber(factor));
+    	splt.setShares(factor);
 		// splt.setPrice("1/1"); // completely optional
     	splt.setAction(KMyMoneyTransactionSplit.Action.SPLIT_SHARES);
     	splt.setMemo(descr);
@@ -681,8 +682,8 @@ public class SecuritiesAccountTransactionManager {
      * then you have 25 shares left, i.e. the number of shares as decreased by a factor
      * of 1/4 (1-for-4). 
      * 
-     * Also, please be aware that GnuCash does not use the factor-logic, neither internally
-     * nor on the GUI, but instead only shows and stores the number of additional shares.
+     * Also, please be aware that KMyMoney does <b>not</b> use the factor-logic, neither internally
+     * nor on the GUI.
      * @param postDate
      * @param descr
      * @return a new share-(reverse-)split transaction
@@ -697,19 +698,19 @@ public class SecuritiesAccountTransactionManager {
     	    final LocalDate postDate,
     	    final String descr) {
     	if ( kmmFile == null ) {
-    		throw new IllegalArgumentException("null KMyMoney file given");
+    		throw new IllegalArgumentException("argument <kmmFile> is null");
     	}
 		
     	if ( stockAcctID == null  ) {
-    		throw new IllegalArgumentException("null stock account ID given");
+    		throw new IllegalArgumentException("argument <stockAcctID> is null");
     	}
 	
-    	if ( ! ( stockAcctID.isSet() ) ) {
-    		throw new IllegalArgumentException("unset stock account ID given");
+    	if ( ! stockAcctID.isSet() ) {
+    		throw new IllegalArgumentException("argument <stockAcctID> is not set");
     	}
 		
     	if ( nofAddShares == null ) {
-    		throw new IllegalArgumentException("null no. of add. shares given");
+    		throw new IllegalArgumentException("argument <nofAddShares> is not set");
     	}
 
     	// CAUTION: Neg. no. of add. shares is allowed!
@@ -718,7 +719,7 @@ public class SecuritiesAccountTransactionManager {
 //    	}
 
     	if ( nofAddShares.getBigDecimal().equals(BigDecimal.ZERO) ) {
-    		throw new IllegalArgumentException("zero-value no. of add. shares given");
+    		throw new IllegalArgumentException("argument <nofAddShares> is = 0");
     	}
 
     	FixedPointNumber nofAddSharesAbs = new FixedPointNumber( nofAddShares.copy().abs() );
@@ -726,12 +727,12 @@ public class SecuritiesAccountTransactionManager {
     	// ::TODO: Reconsider: Should we really reject the input and throw an exception 
     	// (which is kind of overly strict), or shouldn't we rather just issue a warning?
     	if ( nofAddSharesAbs.isLessThan(SPLIT_NOF_ADD_SHARES_MIN) ) {
-    		throw new IllegalArgumentException("unplausible no. of add. shares given (abs. smaller than " + SPLIT_NOF_ADD_SHARES_MIN + ")");
+    		throw new IllegalArgumentException("argument <nofAddShares> has unplausible value (abs. smaller than " + SPLIT_NOF_ADD_SHARES_MIN + ")");
     	}
 
     	// ::TODO: Cf. above
     	if ( nofAddSharesAbs.isGreaterThan(SPLIT_NOF_ADD_SHARES_MAX) ) {
-    		throw new IllegalArgumentException("unplausible no. of add. shares (abs. greater than " + SPLIT_NOF_ADD_SHARES_MAX + ")");
+    		throw new IllegalArgumentException("argument <nofAddShares> has unplausible value (abs. greater than " + SPLIT_NOF_ADD_SHARES_MAX + ")");
     	}
 
     	// CAUTION: Yes, it actually *is* possible that the no. of add. shares

@@ -87,7 +87,7 @@ public class TransactionSplitFilter {
 	public boolean matchesCriteria(final KMyMoneyTransactionSplit splt) {
 		
 		if ( splt == null ) {
-			throw new IllegalArgumentException("null transaction-split given");
+			throw new IllegalArgumentException("argument <splt> is null");
 		}
 		
 		// ---
