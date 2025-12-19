@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 import java.io.File;
-import java.io.InputStream;
+import java.net.URL;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,8 +59,8 @@ public class TestSecuritiesAccountTransactionManager {
 	
 	// -----------------------------------------------------------------
 
-	private KMyMoneyWritableFileImpl gcshInFile = null;
-	private KMyMoneyFileImpl gcshOutFile = null;
+	private KMyMoneyWritableFileImpl kmmInFile = null;
+	private KMyMoneyFileImpl kmmOutFile = null;
 
 	private KMMTrxID newTrxID = null;
 
@@ -83,18 +83,20 @@ public class TestSecuritiesAccountTransactionManager {
 	@Before
 	public void initialize() throws Exception {
 		ClassLoader classLoader = getClass().getClassLoader();
-		// URL gcshFileURL = classLoader.getResource(Const.KMM_FILENAME);
-		// System.err.println("KMyMoney test file resource: '" + gcshFileURL + "'");
-		InputStream gcshInFileStream = null;
+		// URL kmmFileURL = classLoader.getResource(Const.KMM_FILENAME);
+		// System.err.println("KMyMoney test file resource: '" + kmmFileURL + "'");
+		URL kmmInFileURL = null;
+		File kmmInFileRaw = null;
 		try {
-			gcshInFileStream = classLoader.getResourceAsStream(ConstTest.KMM_FILENAME_IN);
+			kmmInFileURL = classLoader.getResource(ConstTest.KMM_FILENAME);
+			kmmInFileRaw = new File(kmmInFileURL.getFile());
 		} catch (Exception exc) {
 			System.err.println("Cannot generate input stream from resource");
 			return;
 		}
 
 		try {
-			gcshInFile = new KMyMoneyWritableFileImpl(gcshInFileStream);
+			kmmInFile = new KMyMoneyWritableFileImpl(kmmInFileRaw);
 		} catch (Exception exc) {
 			System.err.println("Cannot parse KMyMoney in-file");
 			exc.printStackTrace();
@@ -105,13 +107,15 @@ public class TestSecuritiesAccountTransactionManager {
 		newTrxID = new KMMTrxID();
 	}
 
+	// -----------------------------------------------------------------
+
 	@Test
 	public void test01() throws Exception {
 		test01_initExpAccts();
 
 		KMyMoneyWritableTransaction trx = 
 				SecuritiesAccountTransactionManager
-					.genBuyStockTrx(gcshInFile, 
+					.genBuyStockTrx(kmmInFile, 
 									STOCK_ACCT_ID, EXPENSES_ACCT_AMT_LIST, OFFSET_ACCT_ID,
 									NOF_STOCKS, STOCK_PRC, 
 									DATE_POSTED, DESCR);
@@ -128,15 +132,15 @@ public class TestSecuritiesAccountTransactionManager {
 		// + outFile.getPath() + "'");
 		outFile.delete(); // sic, the temp. file is already generated (empty),
 						  // and the KMyMoney file writer does not like that.
-		gcshInFile.writeFile(outFile);
+		kmmInFile.writeFile(outFile);
 
 		test01_check_persisted(outFile);
 	}
 
 	private void test01_check_persisted(File outFile) throws Exception {
-		gcshOutFile = new KMyMoneyFileImpl(outFile);
+		kmmOutFile = new KMyMoneyFileImpl(outFile);
 
-		KMyMoneyTransaction trx = gcshOutFile.getTransactionByID(newTrxID);
+		KMyMoneyTransaction trx = kmmOutFile.getTransactionByID(newTrxID);
 		assertNotEquals(null, trx);
 
 		assertEquals(DATE_POSTED, trx.getDatePosted());
@@ -238,7 +242,7 @@ public class TestSecuritiesAccountTransactionManager {
 
 		KMyMoneyWritableTransaction trx = 
 				SecuritiesAccountTransactionManager
-					.genDividDistribTrx(gcshInFile, 
+					.genDividDistribTrx(kmmInFile, 
 									STOCK_ACCT_ID, INCOME_ACCT_ID, EXPENSES_ACCT_AMT_LIST, OFFSET_ACCT_ID,
 									KMyMoneyTransactionSplit.Action.DIVIDEND, DIV_GROSS, 
 									DATE_POSTED, DESCR);
@@ -255,15 +259,15 @@ public class TestSecuritiesAccountTransactionManager {
 		// + outFile.getPath() + "'");
 		outFile.delete(); // sic, the temp. file is already generated (empty),
 					      // and the KMyMoney file writer does not like that.
-		gcshInFile.writeFile(outFile);
+		kmmInFile.writeFile(outFile);
 
 		test02_check_persisted(outFile);
 	}
 
 	private void test02_check_persisted(File outFile) throws Exception {
-		gcshOutFile = new KMyMoneyFileImpl(outFile);
+		kmmOutFile = new KMyMoneyFileImpl(outFile);
 
-		KMyMoneyTransaction trx = gcshOutFile.getTransactionByID(newTrxID);
+		KMyMoneyTransaction trx = kmmOutFile.getTransactionByID(newTrxID);
 		assertNotEquals(null, trx);
 
 		assertEquals(DATE_POSTED, trx.getDatePosted());

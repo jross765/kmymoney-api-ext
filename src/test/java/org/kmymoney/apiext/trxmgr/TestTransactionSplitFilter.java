@@ -2,7 +2,9 @@ package org.kmymoney.apiext.trxmgr;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.InputStream;
+import java.io.File;
+import java.net.URL;
+import java.time.LocalDate;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -47,18 +49,20 @@ public class TestTransactionSplitFilter {
 	@Before
 	public void initialize() throws Exception {
 		ClassLoader classLoader = getClass().getClassLoader();
-		// URL kmmFileURL = classLoader.getResource(Const.GCSH_FILENAME);
+		// URL kmmFileURL = classLoader.getResource(Const.KMM_FILENAME);
 		// System.err.println("KMyMoney test file resource: '" + kmmFileURL + "'");
-		InputStream kmmFileStream = null;
+		URL kmmFileURL = null;
+		File kmmFileRaw = null;
 		try {
-			kmmFileStream = classLoader.getResourceAsStream(ConstTest.KMM_FILENAME);
+			kmmFileURL = classLoader.getResource(ConstTest.KMM_FILENAME);
+			kmmFileRaw = new File(kmmFileURL.getFile());
 		} catch (Exception exc) {
 			System.err.println("Cannot generate input stream from resource");
 			return;
 		}
 
 		try {
-			kmmFile = new KMyMoneyFileImpl(kmmFileStream);
+			kmmFile = new KMyMoneyFileImpl(kmmFileRaw);
 		} catch (Exception exc) {
 			System.err.println("Cannot parse KMyMoney file");
 			exc.printStackTrace();
