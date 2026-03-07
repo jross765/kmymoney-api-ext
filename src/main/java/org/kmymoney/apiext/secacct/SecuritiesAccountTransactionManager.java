@@ -1,6 +1,5 @@
 package org.kmymoney.apiext.secacct;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -11,8 +10,18 @@ import org.kmymoney.api.read.KMyMoneyTransactionSplit;
 import org.kmymoney.api.write.KMyMoneyWritableTransaction;
 import org.kmymoney.api.write.KMyMoneyWritableTransactionSplit;
 import org.kmymoney.api.write.impl.KMyMoneyWritableFileImpl;
+import org.kmymoney.api.write.impl.KMyMoneyWritableTransactionImpl;
+import org.kmymoney.apispec.read.impl.KMyMoneyStockBuyTransactionImpl;
+import org.kmymoney.apispec.read.impl.KMyMoneyStockDividendTransactionImpl;
+import org.kmymoney.apispec.read.impl.KMyMoneyStockSplitTransactionImpl;
+import org.kmymoney.apispec.write.KMyMoneyWritableStockBuyTransaction;
+import org.kmymoney.apispec.write.KMyMoneyWritableStockDividendTransaction;
+import org.kmymoney.apispec.write.KMyMoneyWritableStockSplitTransaction;
+import org.kmymoney.apispec.write.impl.KMyMoneyWritableStockBuyTransactionImpl;
+import org.kmymoney.apispec.write.impl.KMyMoneyWritableStockDividendTransactionImpl;
+import org.kmymoney.apispec.write.impl.KMyMoneyWritableStockSplitTransactionImpl;
 import org.kmymoney.base.basetypes.simple.KMMAcctID;
-import org.kmymoney.base.tuples.AcctIDAmountPair;
+import org.kmymoney.base.tuples.AcctIDAmountFPPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +66,7 @@ public class SecuritiesAccountTransactionManager {
     // Notes: 
     //  - It is common to specify stock (reverse) splits by a factor (e.g., 2 for a 2-for-1 split,
     //    or 1/4 for 1-for-4 reverse split). So why use the number of add. shares? Because that
-    //    is how GnuCash (cf. the sister project) handles things, as opposed to KMyMoney, both 
+    //    is how KMyMoney (cf. the sister project) handles things, as opposed to KMyMoney, both 
     //    on the data and the GUI level, and given that we want to have both projects as symmetrical 
     //    as possible, we copy that logic here, so that the user can choose between both methods.
     //    Besides, the author has witnessed cases where the bank's statements provide wrong 
@@ -106,7 +115,7 @@ public class SecuritiesAccountTransactionManager {
      * 
      * @see #genBuyStockTrx(KMyMoneyWritableFileImpl, KMMAcctID, Collection, KMMAcctID, FixedPointNumber, FixedPointNumber, LocalDate, String)
      */
-    public static KMyMoneyWritableTransaction genBuyStockTrx(
+    public static KMyMoneyWritableStockBuyTransaction genBuyStockTrx(
     		final KMyMoneyWritableFileImpl kmmFile,
     		final KMMAcctID stockAcctID,
     		final KMMAcctID taxFeeAcctID,
@@ -116,7 +125,7 @@ public class SecuritiesAccountTransactionManager {
     		final FixedPointNumber taxesFees,
     		final LocalDate postDate,
     		final String descr) {
-    	Collection<AcctIDAmountPair> expensesAcctAmtList = new ArrayList<AcctIDAmountPair>();
+    	Collection<AcctIDAmountFPPair> expensesAcctAmtList = new ArrayList<AcctIDAmountFPPair>();
 	
     	if ( taxesFees == null ) {
     	    throw new IllegalArgumentException("argument <taxesFees> is null");
@@ -128,7 +137,7 @@ public class SecuritiesAccountTransactionManager {
 	//   throw new IllegalArgumentException("argument <taxesFees> has value <= 0.0");
 	// }
 
-    	AcctIDAmountPair newPair = new AcctIDAmountPair(taxFeeAcctID, taxesFees);
+    	AcctIDAmountFPPair newPair = new AcctIDAmountFPPair(taxFeeAcctID, taxesFees);
     	expensesAcctAmtList.add(newPair);
 	
     	return genBuyStockTrx(kmmFile, 
@@ -159,10 +168,10 @@ public class SecuritiesAccountTransactionManager {
      * 
      * @see #genBuyStockTrx(KMyMoneyWritableFileImpl, KMMAcctID, KMMAcctID, KMMAcctID, FixedPointNumber, FixedPointNumber, FixedPointNumber, LocalDate, String)
      */
-    public static KMyMoneyWritableTransaction genBuyStockTrx(
+    public static KMyMoneyWritableStockBuyTransaction genBuyStockTrx(
     		final KMyMoneyWritableFileImpl kmmFile,
     		final KMMAcctID stockAcctID,
-    		final Collection<AcctIDAmountPair> expensesAcctAmtList,
+    		final Collection<AcctIDAmountFPPair> expensesAcctAmtList,
     		final KMMAcctID offsetAcctID,
     		final FixedPointNumber nofStocks,
     		final FixedPointNumber stockPrc,
@@ -190,7 +199,7 @@ public class SecuritiesAccountTransactionManager {
     		throw new IllegalArgumentException("argument <expensesAcctAmtList> is empty");
     	}
 			
-    	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
+    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
     		if ( ! elt.isNotNull() ) {
     			throw new IllegalArgumentException("element of argument <expensesAcctAmtList> is null");
     		}
@@ -212,7 +221,7 @@ public class SecuritiesAccountTransactionManager {
     		throw new IllegalArgumentException("argument <stockPrc> is <= 0");
     	}
 	
-    	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
+    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
     		if ( elt.amount().doubleValue() <= 0.0 ) {
     			throw new IllegalArgumentException("element of argument <expensesAcctAmtList> is <= 0.0");
     		}
@@ -220,7 +229,7 @@ public class SecuritiesAccountTransactionManager {
 
     	LOGGER.debug("genBuyStockTrx: Account 1 name (stock):      '" + kmmFile.getAccountByID(stockAcctID).getQualifiedName() + "'");
     	int counter = 1;
-    	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
+    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
     		LOGGER.debug("genBuyStockTrx: Account 2." + counter + " name (expenses): '" + kmmFile.getAccountByID(elt.accountID()).getQualifiedName() + "'");
     		counter++;
     	}
@@ -233,7 +242,7 @@ public class SecuritiesAccountTransactionManager {
     		throw new IllegalArgumentException("Account with ID " + stockAcctID + " is not of type " + KMyMoneyAccount.Type.STOCK);
     	}
 
-    	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
+    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
     		KMyMoneyAccount expensesAcct = kmmFile.getAccountByID(elt.accountID());
     		if ( expensesAcct.getType() != KMyMoneyAccount.Type.EXPENSE ) {
     			throw new IllegalArgumentException("Account with ID " + elt.accountID() + " is not of type " + KMyMoneyAccount.Type.EXPENSE);
@@ -251,22 +260,22 @@ public class SecuritiesAccountTransactionManager {
     	LOGGER.debug("genBuyStockTrx: Net amount: " + amtNet);
 
     	FixedPointNumber amtGross = amtNet.copy();
-    	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
+    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
     		amtGross.add(elt.amount());
     	}
     	LOGGER.debug("genBuyStockTrx: Gross amount: " + amtGross);
 
     	// ---
 
-    	KMyMoneyWritableTransaction trx = kmmFile.createWritableTransaction();
+    	KMyMoneyWritableTransaction genTrx = kmmFile.createWritableTransaction();
     	// Does not work like that: The description/memo on transaction
     	// level is purely internal:
     	// trx.setDescription(description);
-    	trx.setMemo("Generated by SecuritiesAccountTransactionManager, " + LocalDateTime.now());
+    	genTrx.setMemo("Generated by SecuritiesAccountTransactionManager, " + LocalDateTime.now());
 
     	// ---
 
-    	KMyMoneyWritableTransactionSplit splt1 = trx.createWritableSplit(offsetAcct);
+    	KMyMoneyWritableTransactionSplit splt1 = genTrx.createWritableSplit(offsetAcct);
     	splt1.setValue(amtGross.copy().negate());
     	splt1.setShares(amtGross.copy().negate());
     	// splt3.setPrice("1/1"); // completely optional
@@ -276,7 +285,7 @@ public class SecuritiesAccountTransactionManager {
 
     	// ---
 	
-    	KMyMoneyWritableTransactionSplit splt2 = trx.createWritableSplit(stockAcct);
+    	KMyMoneyWritableTransactionSplit splt2 = genTrx.createWritableSplit(stockAcct);
     	splt2.setValue(amtNet);
     	splt2.setShares(nofStocks);
     	splt2.setPrice(stockPrc); // optional (sic), but advisable
@@ -286,25 +295,43 @@ public class SecuritiesAccountTransactionManager {
     	// ---
 
     	counter = 1;
-    	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
+    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
     		KMyMoneyAccount expensesAcct = kmmFile.getAccountByID(elt.accountID());
-    		KMyMoneyWritableTransactionSplit splt3 = trx.createWritableSplit(expensesAcct);
+    		KMyMoneyWritableTransactionSplit splt3 = genTrx.createWritableSplit(expensesAcct);
     		splt3.setValue(elt.amount());
     		splt3.setShares(elt.amount());
-		// splt3.setPrice("1/1"); // completely optional
+    		// splt3.setPrice("1/1"); // completely optional
     		LOGGER.debug("genBuyStockTrx: Split 3." + counter + " to write: " + splt3.toString());
     		counter++;
     	}
 
     	// ---
 
-    	trx.setDatePosted(postDate);
-    	trx.setDateEntered(LocalDate.now());
+    	genTrx.setDatePosted(postDate);
+    	genTrx.setDateEntered(LocalDate.now());
+
+    	LOGGER.info("genBuyStockTrx: Generated new (generic) Transaction: " + genTrx.getID());
 
     	// ---
 
-    	LOGGER.info("genBuyStockTrx: Generated new Transaction: " + trx.getID());
-    	return trx;
+		KMyMoneyStockBuyTransactionImpl specTrxRO = null;
+    	try {
+    		specTrxRO = new KMyMoneyStockBuyTransactionImpl((KMyMoneyWritableTransactionImpl) genTrx);
+    	} catch ( Exception exc ) {
+        	LOGGER.error("genBuyStockTrx: Could not convert generic transaction to specialized one (1): " + genTrx.getID());
+        	throw exc;
+    	}
+    	
+    	KMyMoneyWritableStockBuyTransaction specTrxRW = null;
+    	try {
+        	specTrxRW = new KMyMoneyWritableStockBuyTransactionImpl(specTrxRO);
+        	LOGGER.info("genBuyStockTrx: Generated new (specialized) Transaction: " + specTrxRW.getID());
+    	} catch ( Exception exc ) {
+        	LOGGER.error("genBuyStockTrx: Could not convert generic transaction to specialized one (2): " + genTrx.getID());
+        	throw exc;
+    	}
+    	
+    	return specTrxRW;
     }
     
     // ---------------------------------------------------------------
@@ -329,7 +356,7 @@ public class SecuritiesAccountTransactionManager {
      * @param descr description of the transaction
      * @return a newly generated, modifiable transaction object
      */
-    public static KMyMoneyWritableTransaction genDividDistribTrx(
+    public static KMyMoneyWritableStockDividendTransaction genDividDistribTrx(
     		final KMyMoneyWritableFileImpl kmmFile,
     		final KMMAcctID stockAcctID,
     		final KMMAcctID incomeAcctID,
@@ -340,7 +367,7 @@ public class SecuritiesAccountTransactionManager {
     		final FixedPointNumber taxesFees,
     		final LocalDate postDate,
     		final String descr) {
-    	Collection<AcctIDAmountPair> expensesAcctAmtList = new ArrayList<AcctIDAmountPair>();
+    	Collection<AcctIDAmountFPPair> expensesAcctAmtList = new ArrayList<AcctIDAmountFPPair>();
 	
     	if ( taxesFees == null ) {
     	    throw new IllegalArgumentException("argument <taxesFees> is null");
@@ -352,7 +379,7 @@ public class SecuritiesAccountTransactionManager {
 	//   throw new IllegalArgumentException("argument <taxesFees> has value <= 0.0");
 	// }
 
-    	AcctIDAmountPair newPair = new AcctIDAmountPair(taxFeeAcctID, taxesFees);
+    	AcctIDAmountFPPair newPair = new AcctIDAmountFPPair(taxFeeAcctID, taxesFees);
     	expensesAcctAmtList.add(newPair);
 
     	return genDividDistribTrx(kmmFile,
@@ -383,11 +410,11 @@ public class SecuritiesAccountTransactionManager {
      * @param descr description of the transaction
      * @return a newly generated, modifiable transaction object
      */
-    public static KMyMoneyWritableTransaction genDividDistribTrx(
+    public static KMyMoneyWritableStockDividendTransaction genDividDistribTrx(
     		final KMyMoneyWritableFileImpl kmmFile,
     		final KMMAcctID stockAcctID,
     		final KMMAcctID incomeAcctID,
-    		final Collection<AcctIDAmountPair> expensesAcctAmtList,
+    		final Collection<AcctIDAmountFPPair> expensesAcctAmtList,
     		final KMMAcctID offsetAcctID,
     	    final KMyMoneyTransactionSplit.Action spltAct,
     		final FixedPointNumber divDistrGross,
@@ -420,7 +447,7 @@ public class SecuritiesAccountTransactionManager {
 //    	    throw new IllegalArgumentException("empty expenses account list given");
 //    	}
     			
-    	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
+    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
     		if ( ! elt.isNotNull() ) {
 			throw new IllegalArgumentException("element of argument <expensesAcctAmtList> is null");
     		}
@@ -433,26 +460,26 @@ public class SecuritiesAccountTransactionManager {
     		throw new IllegalArgumentException("argument <divDistrGross> is null");
     	}
 
-	// CAUTION: The following two: In fact, this can happen
-	// (negative booking after cancellation / Stornobuchung)
-	// if ( divDistrGross.doubleValue() <= 0.0 ) {
-	//   throw new IllegalArgumentException("argument <divDistrGross> has value <= 0.0");
-	// }
-	// Instead:
-	if ( divDistrGross.doubleValue() == 0.0 ) {
-		throw new IllegalArgumentException("argument <divDistrGross> has value = 0.0");
-	}
+    	// CAUTION: The following two: In fact, this can happen
+    	// (negative booking after cancellation / Stornobuchung)
+    	// if ( divDistrGross.doubleValue() <= 0.0 ) {
+    	//   throw new IllegalArgumentException("argument <divDistrGross> has value <= 0.0");
+    	// }
+    	// Instead:
+    	if ( divDistrGross.doubleValue() == 0.0 ) {
+    		throw new IllegalArgumentException("argument <divDistrGross> has value = 0.0");
+    	}
 
-//	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
-//	    if ( elt.amount().doubleValue() <= 0.0 ) {
-//		throw new IllegalArgumentException("expense <= 0.0 given");
-//	    }
-//	}
+    	//	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
+    	//	    if ( elt.amount().doubleValue() <= 0.0 ) {
+    	//		throw new IllegalArgumentException("expense <= 0.0 given");
+    	//	    }
+    	//	}
 
     	LOGGER.debug("genDividDistribTrx: Account 1 name (stock):      '" + kmmFile.getAccountByID(stockAcctID).getQualifiedName() + "'");
     	LOGGER.debug("genDividDistribTrx: Account 2 name (income):     '" + kmmFile.getAccountByID(incomeAcctID).getQualifiedName() + "'");
     	int counter = 1;
-    	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
+    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
     		LOGGER.debug("genDividDistribTrx: Account 3." + counter + " name (expenses): '" + kmmFile.getAccountByID(elt.accountID()).getQualifiedName() + "'");
     		counter++;
     	}
@@ -470,7 +497,7 @@ public class SecuritiesAccountTransactionManager {
     		throw new IllegalArgumentException("Account with ID " + incomeAcct + " is not of type " + KMyMoneyAccount.Type.INCOME);
     	}
 
-    	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
+    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
     		KMyMoneyAccount expensesAcct = kmmFile.getAccountByID(elt.accountID());
     		if ( expensesAcct.getType() != KMyMoneyAccount.Type.EXPENSE ) {
     			throw new IllegalArgumentException("Account with ID " + elt.accountID() + " is not of type " + KMyMoneyAccount.Type.EXPENSE);
@@ -485,7 +512,7 @@ public class SecuritiesAccountTransactionManager {
     	// ---
 
     	FixedPointNumber expensesSum = new FixedPointNumber();
-    	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
+    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
     		expensesSum.add(elt.amount());
     	}
     	LOGGER.debug("genDividDistribTrx: Sum of all expenses: " + expensesSum);
@@ -495,67 +522,85 @@ public class SecuritiesAccountTransactionManager {
 
     	// ---
 
-    	KMyMoneyWritableTransaction trx = kmmFile.createWritableTransaction();
+    	KMyMoneyWritableTransaction genTrx = kmmFile.createWritableTransaction();
     	// Does not work like that: The description/memo on transaction
     	// level is purely internal:
     	// trx.setDescription(descr);
     	// Instead:
-    	trx.setMemo("Generated by SecuritiesAccountTransactionManager, " + LocalDateTime.now());
+    	genTrx.setMemo("Generated by SecuritiesAccountTransactionManager, " + LocalDateTime.now());
 
     	// ---
 
-    	KMyMoneyWritableTransactionSplit splt1 = trx.createWritableSplit(stockAcct);
+    	KMyMoneyWritableTransactionSplit splt1 = genTrx.createWritableSplit(stockAcct);
     	splt1.setValue(new FixedPointNumber());
     	splt1.setShares(new FixedPointNumber());
     	splt1.setAction(KMyMoneyTransactionSplit.Action.DIVIDEND);
-	// splt1.setPrice("1/1"); // completely optional
+    	// splt1.setPrice("1/1"); // completely optional
     	LOGGER.debug("genDividDistribTrx: Split 1 to write: " + splt1.toString());
 
     	// ---
 
-    	KMyMoneyWritableTransactionSplit splt2 = trx.createWritableSplit(offsetAcct);
+    	KMyMoneyWritableTransactionSplit splt2 = genTrx.createWritableSplit(offsetAcct);
     	splt2.setValue(divDistrNet);
     	splt2.setShares(divDistrNet);
-	// splt2.setPrice("1/1"); // completely optional
-	// This is what we actually want (cf. above):
-	splt2.setMemo(descr); // sic, only here
+    	// splt2.setPrice("1/1"); // completely optional
+    	// This is what we actually want (cf. above):
+    	splt2.setMemo(descr); // sic, only here
     	LOGGER.debug("genDividDistribTrx: Split 2 to write: " + splt2.toString());
 
     	// ---
 
-    	KMyMoneyWritableTransactionSplit splt3 = trx.createWritableSplit(incomeAcct);
+    	KMyMoneyWritableTransactionSplit splt3 = genTrx.createWritableSplit(incomeAcct);
     	splt3.setValue(divDistrGross.copy().negate());
     	splt3.setShares(divDistrGross.copy().negate());
-	// splt3.setPrice("1/1"); // completely optional
+    	// splt3.setPrice("1/1"); // completely optional
     	LOGGER.debug("genDividDistribTrx: Split 3 to write: " + splt3.toString());
 
     	// ---
 
     	counter = 1;
-    	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
+    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
     		KMyMoneyAccount expensesAcct = kmmFile.getAccountByID(elt.accountID());
-    		KMyMoneyWritableTransactionSplit splt4 = trx.createWritableSplit(expensesAcct);
+    		KMyMoneyWritableTransactionSplit splt4 = genTrx.createWritableSplit(expensesAcct);
     		splt4.setValue(elt.amount());
     		splt4.setShares(elt.amount());
-		// splt4.setPrice("1/1"); // completely optional
+    		// splt4.setPrice("1/1"); // completely optional
     		LOGGER.debug("genDividDistribTrx: Split 4." + counter + " to write: " + splt4.toString());
     		counter++;
     	}
 
     	// ---
 
-    	trx.setDatePosted(postDate);
-    	trx.setDateEntered(LocalDate.now());
+    	genTrx.setDatePosted(postDate);
+    	genTrx.setDateEntered(LocalDate.now());
+
+    	LOGGER.info("genDividDistribTrx: Generated new (generic) Transaction: " + genTrx.getID());
 
     	// ---
 
-    	LOGGER.info("genDividDistribTrx: Generated new Transaction: " + trx.getID());
-    	return trx;
+		KMyMoneyStockDividendTransactionImpl specTrxRO = null;
+    	try {
+    		specTrxRO = new KMyMoneyStockDividendTransactionImpl((KMyMoneyWritableTransactionImpl) genTrx);
+    	} catch ( Exception exc ) {
+        	LOGGER.error("genDividDistribTrx: Could not convert generic transaction to specialized one (1): " + genTrx.getID());
+        	throw exc;
+    	}
+    	
+    	KMyMoneyWritableStockDividendTransaction specTrxRW = null;
+    	try {
+        	specTrxRW = new KMyMoneyWritableStockDividendTransactionImpl(specTrxRO);
+        	LOGGER.info("genDividDistribTrx: Generated new (specialized) Transaction: " + specTrxRW.getID());
+    	} catch ( Exception exc ) {
+        	LOGGER.error("genDividDistribTrx: Could not convert generic transaction to specialized one (2): " + genTrx.getID());
+        	throw exc;
+    	}
+    	
+    	return specTrxRW;
     }
 
     // ---------------------------------------------------------------
     
-    public static KMyMoneyWritableTransaction genStockSplitTrx(
+    public static KMyMoneyWritableStockSplitTransaction genStockSplitTrx(
     		final KMyMoneyWritableFileImpl kmmFile,
     		final KMMAcctID stockAcctID,
     		final StockSplitVar var,
@@ -599,7 +644,7 @@ public class SecuritiesAccountTransactionManager {
      * @see #genStockSplitTrx_nofShares(KMyMoneyWritableFileImpl, KMMAcctID, FixedPointNumber, LocalDate, String)
      * @see #genStockSplitTrx(KMyMoneyWritableFileImpl, KMMAcctID, StockSplitVar, FixedPointNumber, LocalDate, String)
      */
-    public static KMyMoneyWritableTransaction genStockSplitTrx_factor(
+    public static KMyMoneyWritableStockSplitTransaction genStockSplitTrx_factor(
     		final KMyMoneyWritableFileImpl kmmFile,
     		final KMMAcctID stockAcctID,
     		final FixedPointNumber factor,
@@ -625,7 +670,7 @@ public class SecuritiesAccountTransactionManager {
     		throw new IllegalArgumentException("argument <factor> is < 0");
     	}
 
-    	if ( factor.getBigDecimal().equals(BigDecimal.ZERO) ) {
+    	if ( factor.equals(FixedPointNumber.ZERO) ) {
     		throw new IllegalArgumentException("argument <factor> is = 0");
     	}
 
@@ -656,7 +701,7 @@ public class SecuritiesAccountTransactionManager {
     	
     	FixedPointNumber nofSharesOld = stockAcct.getBalance();
     	LOGGER.debug("genStockSplitTrx_factor: Old no. of shares: " + nofSharesOld);
-    	if ( nofSharesOld.equals(BigDecimal.ZERO) ) {
+    	if ( nofSharesOld.equals(FixedPointNumber.ZERO) ) {
     		throw new IllegalStateException("No. of old shares is zero. Cannot carry out a split.");
     	}
     	FixedPointNumber nofSharesNew = nofSharesOld.copy().multiply(factor);
@@ -666,17 +711,17 @@ public class SecuritiesAccountTransactionManager {
     	
     	// ---
 
-    	KMyMoneyWritableTransaction trx = kmmFile.createWritableTransaction();
+    	KMyMoneyWritableTransaction genTrx = kmmFile.createWritableTransaction();
     	// Does not work like that: The description/memo on transaction
     	// level is purely internal:
     	// trx.setDescription(descr);
     	// Instead:
-    	trx.setMemo("Generated by SecuritiesAccountTransactionManager, " + LocalDateTime.now());
+    	genTrx.setMemo("Generated by SecuritiesAccountTransactionManager, " + LocalDateTime.now());
 
     	// ---
     	// CAUTION: One single split
 	
-    	KMyMoneyWritableTransactionSplit splt = trx.createWritableSplit(stockAcct);
+    	KMyMoneyWritableTransactionSplit splt = genTrx.createWritableSplit(stockAcct);
     	splt.setValue(new FixedPointNumber());
     	splt.setShares(factor);
 		// splt.setPrice("1/1"); // completely optional
@@ -686,13 +731,31 @@ public class SecuritiesAccountTransactionManager {
 
     	// ---
 
-    	trx.setDatePosted(postDate);
-    	trx.setDateEntered(LocalDate.now());
+    	genTrx.setDatePosted(postDate);
+    	genTrx.setDateEntered(LocalDate.now());
+
+    	LOGGER.info("genStockSplitTrx_factor: Generated new (generic) Transaction: " + genTrx.getID());
 
     	// ---
 
-    	LOGGER.info("genStockSplitTrx_factor: Generated new Transaction: " + trx.getID());
-    	return trx;
+		KMyMoneyStockSplitTransactionImpl specTrxRO = null;
+    	try {
+    		specTrxRO = new KMyMoneyStockSplitTransactionImpl((KMyMoneyWritableTransactionImpl) genTrx);
+    	} catch ( Exception exc ) {
+        	LOGGER.error("genStockSplitTrx_factor: Could not convert generic transaction to specialized one (1): " + genTrx.getID());
+        	throw exc;
+    	}
+    	
+    	KMyMoneyWritableStockSplitTransaction specTrxRW = null;
+    	try {
+        	specTrxRW = new KMyMoneyWritableStockSplitTransactionImpl(specTrxRO);
+        	LOGGER.info("genStockSplitTrx_factor: Generated new (specialized) Transaction: " + specTrxRW.getID());
+    	} catch ( Exception exc ) {
+        	LOGGER.error("genStockSplitTrx_factor: Could not convert generic transaction to specialized one (2): " + genTrx.getID());
+        	throw exc;
+    	}
+    	
+    	return specTrxRW;
     }
     
     /**
@@ -715,7 +778,7 @@ public class SecuritiesAccountTransactionManager {
      * @see #genStockSplitTrx_factor(KMyMoneyWritableFileImpl, KMMAcctID, FixedPointNumber, LocalDate, String)
      * @see #genStockSplitTrx(KMyMoneyWritableFileImpl, KMMAcctID, StockSplitVar, FixedPointNumber, LocalDate, String)
      */
-    public static KMyMoneyWritableTransaction genStockSplitTrx_nofShares(
+    public static KMyMoneyWritableStockSplitTransaction genStockSplitTrx_nofShares(
     	    final KMyMoneyWritableFileImpl kmmFile,
     	    final KMMAcctID stockAcctID,
     	    final FixedPointNumber nofAddShares, // use neg. number in case of reverse stock-split
@@ -737,12 +800,12 @@ public class SecuritiesAccountTransactionManager {
     		throw new IllegalArgumentException("argument <nofAddShares> is not set");
     	}
 
-    	// CAUTION: Neg. no. of add. shares is allowed!
+    	// CAUTION: Neg. no. of add. shares is allowed (reverse split)!
 //    	if ( nofAddShares.isNegative() ) {
 //    		throw new IllegalArgumentException("negative no. of add. shares given");
 //    	}
 
-    	if ( nofAddShares.getBigDecimal().equals(BigDecimal.ZERO) ) {
+    	if ( nofAddShares.equals(FixedPointNumber.ZERO) ) {
     		throw new IllegalArgumentException("argument <nofAddShares> is = 0");
     	}
 
@@ -784,7 +847,7 @@ public class SecuritiesAccountTransactionManager {
     	
     	FixedPointNumber nofSharesOld = stockAcct.getBalance();
     	LOGGER.debug("genStockSplitTrx_nofShares: Old no. of shares: " + nofSharesOld);
-    	if ( nofSharesOld.equals(BigDecimal.ZERO) ) {
+    	if ( nofSharesOld.equals(FixedPointNumber.ZERO) ) {
     		throw new IllegalStateException("No. of old shares is zero. Cannot carry out a split.");
     	}
     	FixedPointNumber nofSharesNew = nofSharesOld.copy().add(nofAddShares);
