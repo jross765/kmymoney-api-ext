@@ -46,7 +46,7 @@ public class TestSecuritiesAccountTransactionManager {
 																		// buy/sell
 	private static List<AcctIDAmountFPPair> EXPENSES_ACCT_AMT_FP_LIST = new ArrayList<AcctIDAmountFPPair>(); // only for dividend,
 	private static List<AcctIDAmountBFPair> EXPENSES_ACCT_AMT_BF_LIST = new ArrayList<AcctIDAmountBFPair>(); // only for dividend,
-																									  // not for buy/sell
+																									         // not for buy/sell
 	private static KMMAcctID OFFSET_ACCT_ID = new KMMAcctID("A000004");
 	
 	// ---
@@ -359,6 +359,7 @@ public class TestSecuritiesAccountTransactionManager {
 		test02_check_persisted_ml(outFile);
 	}
 
+	// High-level checks
 	private void test02_check_persisted_hl(File outFile) throws Exception {
 		kmmOutFile = new KMyMoneyFileImpl(outFile);
 
@@ -400,6 +401,7 @@ public class TestSecuritiesAccountTransactionManager {
 		assertEquals(DIV_NET_BF,    specTrxRO.getNetDividendRat());
 	}
 
+	// Mid-level checks (i.e., "manually") 
 	private void test02_check_persisted_ml(File outFile) throws Exception {
 		kmmOutFile = new KMyMoneyFileImpl(outFile);
 
@@ -418,7 +420,7 @@ public class TestSecuritiesAccountTransactionManager {
 
 		KMyMoneyTransactionSplit splt1 = null;
 		for ( KMyMoneyTransactionSplit splt : genTrx.getSplits() ) {
-			if ( splt.getAccountID().equals(new KMMComplAcctID(STOCK_ACCT_ID)) ) {
+			if ( splt.getAccountID().getStdID().equals(STOCK_ACCT_ID) ) {
 				splt1 = splt;
 				break;
 			}
@@ -427,7 +429,7 @@ public class TestSecuritiesAccountTransactionManager {
 		
 		KMyMoneyTransactionSplit splt2 = null;
 		for ( KMyMoneyTransactionSplit splt : genTrx.getSplits() ) {
-			if ( splt.getAccountID().equals(new KMMComplAcctID(OFFSET_ACCT_ID)) ) {
+			if ( splt.getAccountID().getStdID().equals(OFFSET_ACCT_ID) ) {
 				splt2 = splt;
 				break;
 			}
@@ -527,11 +529,11 @@ public class TestSecuritiesAccountTransactionManager {
 		assertEquals(DIV_EXP_ACCT_2_ID, splt5.getAccountID().getStdID());
 		assertEquals(null, splt5.getAction());
 		// .
-		assertEquals(DIV_EXP_2_FP.doubleValue(), splt5.getShares().doubleValue(), ConstTest.DIFF_TOLERANCE);
-		assertEquals(DIV_EXP_2_FP.doubleValue(), splt5.getSharesRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(DIV_EXP_2_FP, splt5.getShares());
+		assertEquals(DIV_EXP_2_FP, splt5.getSharesRat());
 		// .
-		assertEquals(DIV_EXP_2_FP.doubleValue(), splt5.getValue().doubleValue(), ConstTest.DIFF_TOLERANCE);
-		assertEquals(DIV_EXP_2_FP.doubleValue(), splt5.getValueRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
+		assertEquals(DIV_EXP_2_FP, splt5.getValue());
+		assertEquals(DIV_EXP_2_FP, splt5.getValueRat());
 		// .
 		assertEquals("", splt5.getMemo());
 	}
