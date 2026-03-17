@@ -66,6 +66,17 @@ public class SecuritiesAccountManager {
     // ---------------------------------------------------------------
     
     public List<KMyMoneyAccount> getShareAccts() {
+    	return getShareAccts(false);
+    }
+    
+    public List<KMyMoneyAccount> getShareAccts(boolean activeOnly) {
+    	if ( activeOnly )
+    		return getActiveShareAccts();
+    	else
+    		return getAllShareAccts();
+    }
+    
+	public List<KMyMoneyAccount> getAllShareAccts() {
     	return invstAcct.getChildren();
     }
     
@@ -73,12 +84,13 @@ public class SecuritiesAccountManager {
     	ArrayList<KMyMoneyAccount> result = new ArrayList<KMyMoneyAccount>();
     	
     	for ( KMyMoneyAccount acct : getShareAccts() ) {
-    		if ( acct.getBalance().isGreaterThan(new FixedPointNumber()) ) {
+    		if ( ! acct.isClosed() &&
+    			 acct.getBalance().isGreaterThan(new FixedPointNumber()) ) {
     			result.add(acct);
     		}
     	}
     	
     	return result;
     }
-    
+
 }
