@@ -18,7 +18,7 @@ import org.kmymoney.base.basetypes.simple.KMMAcctID;
 import junit.framework.JUnit4TestAdapter;
 import xyz.schnorxoborx.base.numbers.FixedPointNumber;
 
-public class TestTransactionSplitFilter {
+public class TestTransactionSplitFilter_FP {
 	
 	public static final KMMQualifSpltID TRXSPLT_1_ID = new KMMQualifSpltID("T000000000000000017", "S0001");
 	public static final KMMQualifSpltID TRXSPLT_2_ID = new KMMQualifSpltID("T000000000000000017", "S0003");
@@ -32,7 +32,7 @@ public class TestTransactionSplitFilter {
 	// -----------------------------------------------------------------
 
 	private KMyMoneyFile kmmFile = null;
-	private TransactionSplitFilter flt = null;
+	private TransactionSplitFilter_FP flt = null;
 	private KMyMoneyTransactionSplit splt = null;
 
 	// -----------------------------------------------------------------
@@ -43,7 +43,7 @@ public class TestTransactionSplitFilter {
 
 	@SuppressWarnings("exports")
 	public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(TestTransactionSplitFilter.class);
+		return new JUnit4TestAdapter(TestTransactionSplitFilter_FP.class);
 	}
 
 	@Before
@@ -73,7 +73,7 @@ public class TestTransactionSplitFilter {
 
 	@Test
 	public void test01() throws Exception {
-		flt = new TransactionSplitFilter();
+		flt = new TransactionSplitFilter_FP();
 		flt.acctID.set(ACCT_1_ID);
 		splt = kmmFile.getTransactionSplitByID(TRXSPLT_1_ID);
 		
@@ -85,7 +85,7 @@ public class TestTransactionSplitFilter {
 
 	@Test
 	public void test02_1() throws Exception {
-		flt = new TransactionSplitFilter();
+		flt = new TransactionSplitFilter_FP();
 		flt.acctID.set(ACCT_1_ID);
 		flt.valueFrom = new FixedPointNumber("-1965.50");
 		flt.valueTo = new FixedPointNumber("-1965.50");
@@ -108,7 +108,7 @@ public class TestTransactionSplitFilter {
 
 	@Test
 	public void test02_2() throws Exception {
-		flt = new TransactionSplitFilter();
+		flt = new TransactionSplitFilter_FP();
 		flt.acctID.set(ACCT_7_ID);
 		flt.valueFrom = new FixedPointNumber("-1955.00");
 		flt.valueTo = new FixedPointNumber("1955.00");
@@ -141,7 +141,7 @@ public class TestTransactionSplitFilter {
 
 	@Test
 	public void test03_1() throws Exception {
-		flt = new TransactionSplitFilter();
+		flt = new TransactionSplitFilter_FP();
 		flt.acctID.set(ACCT_1_ID);
 		flt.sharesFrom = new FixedPointNumber("-1965.50");
 		flt.sharesTo = new FixedPointNumber("-1965.50");
@@ -164,7 +164,7 @@ public class TestTransactionSplitFilter {
 
 	@Test
 	public void test03_2() throws Exception {
-		flt = new TransactionSplitFilter();
+		flt = new TransactionSplitFilter_FP();
 		flt.acctID.set(ACCT_7_ID);
 		flt.sharesFrom = new FixedPointNumber("17.0000");
 		flt.sharesTo = new FixedPointNumber("17.0000");
@@ -197,7 +197,7 @@ public class TestTransactionSplitFilter {
 	
 	@Test
 	public void test04() throws Exception {
-		flt = new TransactionSplitFilter();
+		flt = new TransactionSplitFilter_FP();
 		flt.acctID.set(ACCT_7_ID);
 		flt.action = KMyMoneyTransactionSplit.Action.BUY_SHARES;
 		splt = kmmFile.getTransactionSplitByID(TRXSPLT_2_ID);
@@ -210,7 +210,7 @@ public class TestTransactionSplitFilter {
 
 	@Test
 	public void test05() throws Exception {
-		flt = new TransactionSplitFilter();
+		flt = new TransactionSplitFilter_FP();
 		flt.acctID.set(ACCT_7_ID);
 		flt.memoPart = ""; // sic, the TRANSACTION's description is set, not the SPLIT's one
 		splt = kmmFile.getTransactionSplitByID(TRXSPLT_2_ID);

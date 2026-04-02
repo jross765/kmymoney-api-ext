@@ -85,7 +85,7 @@ public class SecuritiesAccountManager {
     	
     	for ( KMyMoneyAccount acct : getShareAccts() ) {
     		if ( ! acct.isClosed() &&
-    			 acct.getBalance().isGreaterThan(new FixedPointNumber()) ) {
+    			 acct.getBalance().isGreaterThan(FixedPointNumber.ZERO) ) {
     			result.add(acct);
     		}
     	}

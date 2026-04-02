@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.apache.commons.numbers.fraction.BigFraction;
 import org.kmymoney.api.read.KMyMoneyAccount;
 import org.kmymoney.api.read.KMyMoneyTransactionSplit;
 import org.kmymoney.api.write.KMyMoneyWritableTransaction;
@@ -21,11 +22,9 @@ import org.kmymoney.apispec.write.impl.KMyMoneyWritableStockBuyTransactionImpl;
 import org.kmymoney.apispec.write.impl.KMyMoneyWritableStockDividendTransactionImpl;
 import org.kmymoney.apispec.write.impl.KMyMoneyWritableStockSplitTransactionImpl;
 import org.kmymoney.base.basetypes.simple.KMMAcctID;
-import org.kmymoney.base.tuples.AcctIDAmountFPPair;
+import org.kmymoney.base.tuples.AcctIDAmountBFPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import xyz.schnorxoborx.base.numbers.FixedPointNumber;
 
 /**
  * Collection of simplified, high-level access functions to a KMyMoney file for
@@ -34,7 +33,7 @@ import xyz.schnorxoborx.base.numbers.FixedPointNumber;
  * These methods are sort of "macros" for the low-level access functions
  * in the "API" module.
  */
-public class SecuritiesAccountTransactionManager {
+public class SecuritiesAccountTransactionManager_BF {
     
     public enum Type {
     	BUY_STOCK,
@@ -51,16 +50,16 @@ public class SecuritiesAccountTransactionManager {
     // ---------------------------------------------------------------
     
     // Logger
-    private static final Logger LOGGER = LoggerFactory.getLogger(SecuritiesAccountTransactionManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SecuritiesAccountTransactionManager_BF.class);
     
     // ----------------------------
 
     // ::TODO These numbers should be extracted into a config. file. 
     // ::MAGIC
-    private static FixedPointNumber SPLIT_FACTOR_MIN = new FixedPointNumber("1/20"); 
+    private static BigFraction SPLIT_FACTOR_MIN = BigFraction.of(1, 20); 
     	// anything below that value is technically OK,
         // but unplausible and thus forbidden.
-    private static FixedPointNumber SPLIT_FACTOR_MAX = new FixedPointNumber("20");
+    private static BigFraction SPLIT_FACTOR_MAX = BigFraction.of(20);
     	// accordingly
     
     // Notes: 
@@ -90,8 +89,8 @@ public class SecuritiesAccountTransactionManager {
     //    ==> ::TODO These numbers *must* be extracted into a config. file ASAP, whereas the above 
     //    factor *should* (but in fact can wait a little). 
     // ::MAGIC
-    private static FixedPointNumber SPLIT_NOF_ADD_SHARES_MIN = new FixedPointNumber("1");
-    private static FixedPointNumber SPLIT_NOF_ADD_SHARES_MAX = new FixedPointNumber("99999");
+    private static BigFraction SPLIT_NOF_ADD_SHARES_MIN = BigFraction.of(1);
+    private static BigFraction SPLIT_NOF_ADD_SHARES_MAX = BigFraction.of(99999);
 
     // ---------------------------------------------------------------
     
@@ -113,19 +112,19 @@ public class SecuritiesAccountTransactionManager {
      * @param descr description of the transaction
      * @return a newly generated, modifiable transaction object
      * 
-     * @see #genBuyStockTrx(KMyMoneyWritableFileImpl, KMMAcctID, Collection, KMMAcctID, FixedPointNumber, FixedPointNumber, LocalDate, String)
+     * @see #genBuyStockTrx(KMyMoneyWritableFileImpl, KMMAcctID, Collection, KMMAcctID, BigFraction, BigFraction, LocalDate, String)
      */
     public static KMyMoneyWritableStockBuyTransaction genBuyStockTrx(
     		final KMyMoneyWritableFileImpl kmmFile,
     		final KMMAcctID stockAcctID,
     		final KMMAcctID taxFeeAcctID,
     		final KMMAcctID offsetAcctID,
-    		final FixedPointNumber nofStocks,
-    		final FixedPointNumber stockPrc,
-    		final FixedPointNumber taxesFees,
+    		final BigFraction nofStocks,
+    		final BigFraction stockPrc,
+    		final BigFraction taxesFees,
     		final LocalDate postDate,
     		final String descr) {
-    	Collection<AcctIDAmountFPPair> expensesAcctAmtList = new ArrayList<AcctIDAmountFPPair>();
+    	Collection<AcctIDAmountBFPair> expensesAcctAmtList = new ArrayList<AcctIDAmountBFPair>();
 	
     	if ( taxesFees == null ) {
     	    throw new IllegalArgumentException("argument <taxesFees> is null");
@@ -137,9 +136,9 @@ public class SecuritiesAccountTransactionManager {
 	//   throw new IllegalArgumentException("argument <taxesFees> has value <= 0.0");
 	// }
 
-    	AcctIDAmountFPPair newPair = new AcctIDAmountFPPair(taxFeeAcctID, taxesFees);
+    	AcctIDAmountBFPair newPair = new AcctIDAmountBFPair(taxFeeAcctID, taxesFees);
     	expensesAcctAmtList.add(newPair);
-	
+
     	return genBuyStockTrx(kmmFile, 
     				stockAcctID, expensesAcctAmtList, offsetAcctID, 
     				nofStocks, stockPrc, 
@@ -166,15 +165,15 @@ public class SecuritiesAccountTransactionManager {
      * @param descr description of the transaction
      * @return a newly generated, modifiable transaction object
      * 
-     * @see #genBuyStockTrx(KMyMoneyWritableFileImpl, KMMAcctID, KMMAcctID, KMMAcctID, FixedPointNumber, FixedPointNumber, FixedPointNumber, LocalDate, String)
+     * @see #genBuyStockTrx(KMyMoneyWritableFileImpl, KMMAcctID, KMMAcctID, KMMAcctID, BigFraction, BigFraction, BigFraction, LocalDate, String)
      */
     public static KMyMoneyWritableStockBuyTransaction genBuyStockTrx(
     		final KMyMoneyWritableFileImpl kmmFile,
     		final KMMAcctID stockAcctID,
-    		final Collection<AcctIDAmountFPPair> expensesAcctAmtList,
+    		final Collection<AcctIDAmountBFPair> expensesAcctAmtList,
     		final KMMAcctID offsetAcctID,
-    		final FixedPointNumber nofStocks,
-    		final FixedPointNumber stockPrc,
+    		final BigFraction nofStocks,
+    		final BigFraction stockPrc,
     		final LocalDate postDate,
     		final String descr) {
     	if ( kmmFile == null ) {
@@ -199,7 +198,7 @@ public class SecuritiesAccountTransactionManager {
     		throw new IllegalArgumentException("argument <expensesAcctAmtList> is empty");
     	}
 			
-    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
+    	for ( AcctIDAmountBFPair elt : expensesAcctAmtList ) {
     		if ( ! elt.isNotNull() ) {
     			throw new IllegalArgumentException("element of argument <expensesAcctAmtList> is null");
     		}
@@ -221,7 +220,7 @@ public class SecuritiesAccountTransactionManager {
     		throw new IllegalArgumentException("argument <stockPrc> is <= 0");
     	}
 	
-    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
+    	for ( AcctIDAmountBFPair elt : expensesAcctAmtList ) {
     		if ( elt.amount().doubleValue() <= 0.0 ) {
     			throw new IllegalArgumentException("element of argument <expensesAcctAmtList> is <= 0.0");
     		}
@@ -229,7 +228,7 @@ public class SecuritiesAccountTransactionManager {
 
     	LOGGER.debug("genBuyStockTrx: Account 1 name (stock):      '" + kmmFile.getAccountByID(stockAcctID).getQualifiedName() + "'");
     	int counter = 1;
-    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
+    	for ( AcctIDAmountBFPair elt : expensesAcctAmtList ) {
     		LOGGER.debug("genBuyStockTrx: Account 2." + counter + " name (expenses): '" + kmmFile.getAccountByID(elt.accountID()).getQualifiedName() + "'");
     		counter++;
     	}
@@ -237,12 +236,13 @@ public class SecuritiesAccountTransactionManager {
 
     	// ---
     	// Check account types
+
     	KMyMoneyAccount stockAcct  = kmmFile.getAccountByID(stockAcctID);
     	if ( stockAcct.getType() != KMyMoneyAccount.Type.STOCK ) {
     		throw new IllegalArgumentException("Account with ID " + stockAcctID + " is not of type " + KMyMoneyAccount.Type.STOCK);
     	}
 
-    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
+    	for ( AcctIDAmountBFPair elt : expensesAcctAmtList ) {
     		KMyMoneyAccount expensesAcct = kmmFile.getAccountByID(elt.accountID());
     		if ( expensesAcct.getType() != KMyMoneyAccount.Type.EXPENSE ) {
     			throw new IllegalArgumentException("Account with ID " + elt.accountID() + " is not of type " + KMyMoneyAccount.Type.EXPENSE);
@@ -256,12 +256,12 @@ public class SecuritiesAccountTransactionManager {
 
     	// ---
 
-    	FixedPointNumber amtNet   = nofStocks.copy().multiply(stockPrc);
+    	BigFraction amtNet = nofStocks.multiply(stockPrc); // immutable
     	LOGGER.debug("genBuyStockTrx: Net amount: " + amtNet);
 
-    	FixedPointNumber amtGross = amtNet.copy();
-    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
-    		amtGross.add(elt.amount());
+    	BigFraction amtGross = amtNet;
+    	for ( AcctIDAmountBFPair elt : expensesAcctAmtList ) {
+    		amtGross = amtGross.add(elt.amount()); // immutable
     	}
     	LOGGER.debug("genBuyStockTrx: Gross amount: " + amtGross);
 
@@ -276,8 +276,8 @@ public class SecuritiesAccountTransactionManager {
     	// ---
 
     	KMyMoneyWritableTransactionSplit splt1 = genTrx.createWritableSplit(offsetAcct);
-    	splt1.setValue(amtGross.copy().negate());
-    	splt1.setShares(amtGross.copy().negate());
+    	splt1.setValue(amtGross.negate());
+    	splt1.setShares(amtGross.negate());
     	// splt3.setPrice("1/1"); // completely optional
     	// This is what we actually want (cf. above):
     	splt1.setMemo(descr); // sic, only here
@@ -295,12 +295,12 @@ public class SecuritiesAccountTransactionManager {
     	// ---
 
     	counter = 1;
-    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
+    	for ( AcctIDAmountBFPair elt : expensesAcctAmtList ) {
     		KMyMoneyAccount expensesAcct = kmmFile.getAccountByID(elt.accountID());
     		KMyMoneyWritableTransactionSplit splt3 = genTrx.createWritableSplit(expensesAcct);
     		splt3.setValue(elt.amount());
     		splt3.setShares(elt.amount());
-    		// splt3.setPrice("1/1"); // completely optional
+		// splt3.setPrice("1/1"); // completely optional
     		LOGGER.debug("genBuyStockTrx: Split 3." + counter + " to write: " + splt3.toString());
     		counter++;
     	}
@@ -314,7 +314,7 @@ public class SecuritiesAccountTransactionManager {
 
     	// ---
 
-		KMyMoneyStockBuyTransactionImpl specTrxRO = null;
+	KMyMoneyStockBuyTransactionImpl specTrxRO = null;
     	try {
     		specTrxRO = new KMyMoneyStockBuyTransactionImpl((KMyMoneyWritableTransactionImpl) genTrx);
     	} catch ( Exception exc ) {
@@ -363,11 +363,11 @@ public class SecuritiesAccountTransactionManager {
     		final KMMAcctID taxFeeAcctID,
     		final KMMAcctID offsetAcctID,
     	    final KMyMoneyTransactionSplit.Action spltAct,
-    		final FixedPointNumber divDistrGross,
-    		final FixedPointNumber taxesFees,
+    		final BigFraction divDistrGross,
+    		final BigFraction taxesFees,
     		final LocalDate postDate,
     		final String descr) {
-    	Collection<AcctIDAmountFPPair> expensesAcctAmtList = new ArrayList<AcctIDAmountFPPair>();
+    	Collection<AcctIDAmountBFPair> expensesAcctAmtList = new ArrayList<AcctIDAmountBFPair>();
 	
     	if ( taxesFees == null ) {
     	    throw new IllegalArgumentException("argument <taxesFees> is null");
@@ -379,7 +379,7 @@ public class SecuritiesAccountTransactionManager {
 	//   throw new IllegalArgumentException("argument <taxesFees> has value <= 0.0");
 	// }
 
-    	AcctIDAmountFPPair newPair = new AcctIDAmountFPPair(taxFeeAcctID, taxesFees);
+    	AcctIDAmountBFPair newPair = new AcctIDAmountBFPair(taxFeeAcctID, taxesFees);
     	expensesAcctAmtList.add(newPair);
 
     	return genDividDistribTrx(kmmFile,
@@ -414,10 +414,10 @@ public class SecuritiesAccountTransactionManager {
     		final KMyMoneyWritableFileImpl kmmFile,
     		final KMMAcctID stockAcctID,
     		final KMMAcctID incomeAcctID,
-    		final Collection<AcctIDAmountFPPair> expensesAcctAmtList,
+    		final Collection<AcctIDAmountBFPair> expensesAcctAmtList,
     		final KMMAcctID offsetAcctID,
     	    final KMyMoneyTransactionSplit.Action spltAct,
-    		final FixedPointNumber divDistrGross,
+    		final BigFraction divDistrGross,
     		final LocalDate postDate,
     		final String descr) {
     	if ( kmmFile == null ) {
@@ -447,7 +447,7 @@ public class SecuritiesAccountTransactionManager {
 //    	    throw new IllegalArgumentException("empty expenses account list given");
 //    	}
     			
-    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
+    	for ( AcctIDAmountBFPair elt : expensesAcctAmtList ) {
     		if ( ! elt.isNotNull() ) {
 			throw new IllegalArgumentException("element of argument <expensesAcctAmtList> is null");
     		}
@@ -479,7 +479,7 @@ public class SecuritiesAccountTransactionManager {
     	LOGGER.debug("genDividDistribTrx: Account 1 name (stock):      '" + kmmFile.getAccountByID(stockAcctID).getQualifiedName() + "'");
     	LOGGER.debug("genDividDistribTrx: Account 2 name (income):     '" + kmmFile.getAccountByID(incomeAcctID).getQualifiedName() + "'");
     	int counter = 1;
-    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
+    	for ( AcctIDAmountBFPair elt : expensesAcctAmtList ) {
     		LOGGER.debug("genDividDistribTrx: Account 3." + counter + " name (expenses): '" + kmmFile.getAccountByID(elt.accountID()).getQualifiedName() + "'");
     		counter++;
     	}
@@ -487,6 +487,7 @@ public class SecuritiesAccountTransactionManager {
 
     	// ---
     	// Check account types
+
     	KMyMoneyAccount stockAcct  = kmmFile.getAccountByID(stockAcctID);
     	if ( stockAcct.getType() != KMyMoneyAccount.Type.STOCK ) {
     		throw new IllegalArgumentException("Account with ID " + stockAcctID + " is not of type " + KMyMoneyAccount.Type.STOCK);
@@ -497,7 +498,7 @@ public class SecuritiesAccountTransactionManager {
     		throw new IllegalArgumentException("Account with ID " + incomeAcct + " is not of type " + KMyMoneyAccount.Type.INCOME);
     	}
 
-    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
+    	for ( AcctIDAmountBFPair elt : expensesAcctAmtList ) {
     		KMyMoneyAccount expensesAcct = kmmFile.getAccountByID(elt.accountID());
     		if ( expensesAcct.getType() != KMyMoneyAccount.Type.EXPENSE ) {
     			throw new IllegalArgumentException("Account with ID " + elt.accountID() + " is not of type " + KMyMoneyAccount.Type.EXPENSE);
@@ -511,13 +512,13 @@ public class SecuritiesAccountTransactionManager {
 
     	// ---
 
-    	FixedPointNumber expensesSum = new FixedPointNumber();
-    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
-    		expensesSum.add(elt.amount());
+    	BigFraction expensesSum = BigFraction.ZERO;
+    	for ( AcctIDAmountBFPair elt : expensesAcctAmtList ) {
+    		expensesSum = expensesSum.add(elt.amount()); // immutable
     	}
     	LOGGER.debug("genDividDistribTrx: Sum of all expenses: " + expensesSum);
 
-    	FixedPointNumber divDistrNet = divDistrGross.copy().subtract(expensesSum);
+    	BigFraction divDistrNet = divDistrGross.subtract(expensesSum);
     	LOGGER.debug("genDividDistribTrx: Net dividend: " + divDistrNet);
 
     	// ---
@@ -532,8 +533,8 @@ public class SecuritiesAccountTransactionManager {
     	// ---
 
     	KMyMoneyWritableTransactionSplit splt1 = genTrx.createWritableSplit(stockAcct);
-    	splt1.setValue(new FixedPointNumber());
-    	splt1.setShares(new FixedPointNumber());
+    	splt1.setValue(BigFraction.ZERO);
+    	splt1.setShares(BigFraction.ZERO);
     	splt1.setAction(KMyMoneyTransactionSplit.Action.DIVIDEND);
     	// splt1.setPrice("1/1"); // completely optional
     	LOGGER.debug("genDividDistribTrx: Split 1 to write: " + splt1.toString());
@@ -551,20 +552,20 @@ public class SecuritiesAccountTransactionManager {
     	// ---
 
     	KMyMoneyWritableTransactionSplit splt3 = genTrx.createWritableSplit(incomeAcct);
-    	splt3.setValue(divDistrGross.copy().negate());
-    	splt3.setShares(divDistrGross.copy().negate());
+    	splt3.setValue(divDistrGross.negate());
+    	splt3.setShares(divDistrGross.negate());
     	// splt3.setPrice("1/1"); // completely optional
     	LOGGER.debug("genDividDistribTrx: Split 3 to write: " + splt3.toString());
 
     	// ---
 
     	counter = 1;
-    	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
+    	for ( AcctIDAmountBFPair elt : expensesAcctAmtList ) {
     		KMyMoneyAccount expensesAcct = kmmFile.getAccountByID(elt.accountID());
     		KMyMoneyWritableTransactionSplit splt4 = genTrx.createWritableSplit(expensesAcct);
     		splt4.setValue(elt.amount());
     		splt4.setShares(elt.amount());
-    		// splt4.setPrice("1/1"); // completely optional
+		// splt4.setPrice("1/1"); // completely optional
     		LOGGER.debug("genDividDistribTrx: Split 4." + counter + " to write: " + splt4.toString());
     		counter++;
     	}
@@ -578,7 +579,7 @@ public class SecuritiesAccountTransactionManager {
 
     	// ---
 
-		KMyMoneyStockDividendTransactionImpl specTrxRO = null;
+	KMyMoneyStockDividendTransactionImpl specTrxRO = null;
     	try {
     		specTrxRO = new KMyMoneyStockDividendTransactionImpl((KMyMoneyWritableTransactionImpl) genTrx);
     	} catch ( Exception exc ) {
@@ -604,7 +605,7 @@ public class SecuritiesAccountTransactionManager {
     		final KMyMoneyWritableFileImpl kmmFile,
     		final KMMAcctID stockAcctID,
     		final StockSplitVar var,
-    		final FixedPointNumber factorOfNofAddShares,
+    		final BigFraction factorOfNofAddShares,
     		final LocalDate postDate,
     		final String descr) {
     	if ( var == StockSplitVar.FACTOR ) {
@@ -641,13 +642,13 @@ public class SecuritiesAccountTransactionManager {
      * @param descr
      * @return a new share-(reverse-)split transaction
      * 
-     * @see #genStockSplitTrx_nofShares(KMyMoneyWritableFileImpl, KMMAcctID, FixedPointNumber, LocalDate, String)
-     * @see #genStockSplitTrx(KMyMoneyWritableFileImpl, KMMAcctID, StockSplitVar, FixedPointNumber, LocalDate, String)
+     * @see #genStockSplitTrx_nofShares(KMyMoneyWritableFileImpl, KMMAcctID, BigFraction, LocalDate, String)
+     * @see #genStockSplitTrx(KMyMoneyWritableFileImpl, KMMAcctID, StockSplitVar, BigFraction, LocalDate, String)
      */
     public static KMyMoneyWritableStockSplitTransaction genStockSplitTrx_factor(
     		final KMyMoneyWritableFileImpl kmmFile,
     		final KMMAcctID stockAcctID,
-    		final FixedPointNumber factor,
+    		final BigFraction factor,
     		final LocalDate postDate,
     		final String descr) {
     	if ( kmmFile == null ) {
@@ -666,27 +667,26 @@ public class SecuritiesAccountTransactionManager {
     		throw new IllegalArgumentException("argument <factor> is null");
     	}
 
-    	if ( factor.isNegative() ) {
-    		throw new IllegalArgumentException("argument <factor> is < 0");
-    	}
-
-    	if ( factor.equals(FixedPointNumber.ZERO) ) {
-    		throw new IllegalArgumentException("argument <factor> is = 0");
+    	if ( factor.compareTo(BigFraction.ZERO) <= 0 ) {
+    		throw new IllegalArgumentException("argument <factor> is <= 0");
     	}
 
     	// ::TODO: Reconsider: Should we really reject the input and throw an exception 
     	// (which is kind of overly strict), or shouldn't we rather just issue a warning?
-    	if ( factor.isLessThan(SPLIT_FACTOR_MIN) ) {
+    	// CAUTION: the following line is written so oddly because of a bug in BigFraction.compareTo()
+	if ( SPLIT_FACTOR_MIN.subtract(factor).compareTo(BigFraction.ZERO) > 0 ) {
     		throw new IllegalArgumentException("argument <factor> has unplausible value (smaller than " + SPLIT_FACTOR_MIN + ")");
     	}
 
     	// ::TODO: cf. above
-    	if ( factor.isGreaterThan(SPLIT_FACTOR_MAX) ) {
+    	// CAUTION: the following line is written so oddly because of a bug in BigFraction.compareTo()
+    	if ( SPLIT_FACTOR_MAX.subtract(factor).compareTo(BigFraction.ZERO) < 0 ) {
     		throw new IllegalArgumentException("argument <factor> has unplausible value (greater than " + SPLIT_FACTOR_MAX + ")");
     	}
 
     	// ---
     	// Check account type
+
     	KMyMoneyAccount stockAcct  = kmmFile.getAccountByID(stockAcctID);
     	if ( stockAcct == null ) {
     		throw new IllegalStateException("Could not find account with that ID");
@@ -699,14 +699,14 @@ public class SecuritiesAccountTransactionManager {
 
     	// ---
     	
-    	FixedPointNumber nofSharesOld = stockAcct.getBalance(postDate);
+    	BigFraction nofSharesOld = stockAcct.getBalanceRat(postDate);
     	LOGGER.debug("genStockSplitTrx_factor: Old no. of shares: " + nofSharesOld);
-    	if ( nofSharesOld.equals(FixedPointNumber.ZERO) ) {
+    	if ( nofSharesOld.equals(BigFraction.ZERO) ) {
     		throw new IllegalStateException("No. of old shares is zero. Cannot carry out a split.");
     	}
-    	FixedPointNumber nofSharesNew = nofSharesOld.copy().multiply(factor);
+    	BigFraction nofSharesNew = nofSharesOld.multiply(factor);
     	LOGGER.debug("genStockSplitTrx_factor: New no. of shares: " + nofSharesNew);
-    	FixedPointNumber nofAddShares = nofSharesNew.copy().subtract(nofSharesOld);
+    	BigFraction nofAddShares = nofSharesNew.subtract(nofSharesOld);
     	LOGGER.debug("genStockSplitTrx_factor: No. of add. shares: " + nofAddShares);
     	
     	// ---
@@ -722,7 +722,7 @@ public class SecuritiesAccountTransactionManager {
     	// CAUTION: One single split
 	
     	KMyMoneyWritableTransactionSplit splt = genTrx.createWritableSplit(stockAcct);
-    	splt.setValue(new FixedPointNumber());
+    	splt.setValue(BigFraction.ZERO);
     	splt.setShares(factor);
 		// splt.setPrice("1/1"); // completely optional
     	splt.setAction(KMyMoneyTransactionSplit.Action.SPLIT_SHARES);
@@ -775,13 +775,13 @@ public class SecuritiesAccountTransactionManager {
      * @param descr
      * @return a new share-(reverse-)split transaction
      * 
-     * @see #genStockSplitTrx_factor(KMyMoneyWritableFileImpl, KMMAcctID, FixedPointNumber, LocalDate, String)
-     * @see #genStockSplitTrx(KMyMoneyWritableFileImpl, KMMAcctID, StockSplitVar, FixedPointNumber, LocalDate, String)
+     * @see #genStockSplitTrx_factor(KMyMoneyWritableFileImpl, KMMAcctID, BigFraction, LocalDate, String)
+     * @see #genStockSplitTrx(KMyMoneyWritableFileImpl, KMMAcctID, StockSplitVar, BigFraction, LocalDate, String)
      */
     public static KMyMoneyWritableStockSplitTransaction genStockSplitTrx_nofShares(
     	    final KMyMoneyWritableFileImpl kmmFile,
     	    final KMMAcctID stockAcctID,
-    	    final FixedPointNumber nofAddShares, // use neg. number in case of reverse stock-split
+    	    final BigFraction nofAddShares, // use neg. number in case of reverse stock-split
     	    final LocalDate postDate,
     	    final String descr) {
     	if ( kmmFile == null ) {
@@ -797,7 +797,7 @@ public class SecuritiesAccountTransactionManager {
     	}
 		
     	if ( nofAddShares == null ) {
-    		throw new IllegalArgumentException("argument <nofAddShares> is not set");
+    		throw new IllegalArgumentException("argument <nofAddShares> is null");
     	}
 
     	// CAUTION: Neg. no. of add. shares is allowed (reverse split)!
@@ -805,20 +805,22 @@ public class SecuritiesAccountTransactionManager {
 //    		throw new IllegalArgumentException("negative no. of add. shares given");
 //    	}
 
-    	if ( nofAddShares.equals(FixedPointNumber.ZERO) ) {
+    	if ( nofAddShares.equals(BigFraction.ZERO) ) {
     		throw new IllegalArgumentException("argument <nofAddShares> is = 0");
     	}
 
-    	FixedPointNumber nofAddSharesAbs = new FixedPointNumber( nofAddShares.copy().abs() );
+    	BigFraction nofAddSharesAbs = nofAddShares.abs(); // immutable
     	
     	// ::TODO: Reconsider: Should we really reject the input and throw an exception 
     	// (which is kind of overly strict), or shouldn't we rather just issue a warning?
-    	if ( nofAddSharesAbs.isLessThan(SPLIT_NOF_ADD_SHARES_MIN) ) {
+    	// CAUTION: the following line is written so oddly because of a bug in BigFraction.compareTo()
+    	if ( SPLIT_NOF_ADD_SHARES_MIN.subtract(nofAddSharesAbs).compareTo(BigFraction.ZERO) > 0 ) {
     		throw new IllegalArgumentException("argument <nofAddShares> has unplausible value (abs. smaller than " + SPLIT_NOF_ADD_SHARES_MIN + ")");
     	}
 
     	// ::TODO: Cf. above
-    	if ( nofAddSharesAbs.isGreaterThan(SPLIT_NOF_ADD_SHARES_MAX) ) {
+    	// CAUTION: the following line is written so oddly because of a bug in BigFraction.compareTo()
+    	if ( SPLIT_NOF_ADD_SHARES_MAX.subtract(nofAddSharesAbs).compareTo(BigFraction.ZERO) < 0 ) {
     		throw new IllegalArgumentException("argument <nofAddShares> has unplausible value (abs. greater than " + SPLIT_NOF_ADD_SHARES_MAX + ")");
     	}
 
@@ -845,14 +847,14 @@ public class SecuritiesAccountTransactionManager {
 
     	// ---
     	
-    	FixedPointNumber nofSharesOld = stockAcct.getBalance(postDate);
+    	BigFraction nofSharesOld = stockAcct.getBalanceRat(postDate);
     	LOGGER.debug("genStockSplitTrx_nofShares: Old no. of shares: " + nofSharesOld);
-    	if ( nofSharesOld.equals(FixedPointNumber.ZERO) ) {
+    	if ( nofSharesOld.equals(BigFraction.ZERO) ) {
     		throw new IllegalStateException("No. of old shares is zero. Cannot carry out a split.");
     	}
-    	FixedPointNumber nofSharesNew = nofSharesOld.copy().add(nofAddShares);
+    	BigFraction nofSharesNew = nofSharesOld.add(nofAddShares);
     	LOGGER.debug("genStockSplitTrx_nofShares: New no. of shares: " + nofSharesNew);
-    	FixedPointNumber factor = nofSharesNew.copy().divide(nofSharesOld);
+    	BigFraction factor = nofSharesNew.divide(nofSharesOld);
     	LOGGER.debug("genStockSplitTrx_nofShares: Factor: " + factor);
     	
     	// ---

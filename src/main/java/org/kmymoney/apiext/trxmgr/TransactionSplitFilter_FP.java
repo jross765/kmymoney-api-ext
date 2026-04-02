@@ -11,15 +11,18 @@ import org.kmymoney.base.basetypes.simple.KMMPyeID;
 
 import xyz.schnorxoborx.base.numbers.FixedPointNumber;
 
-public class TransactionSplitFilter {
+public class TransactionSplitFilter_FP {
+
+	// a bit bulky, I admit...
+	static final FixedPointNumber UNSET_VALUE = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
 
 	// ---------------------------------------------------------------
 
 	public KMyMoneyTransactionSplit.Action     action;
 	public KMyMoneyTransactionSplit.ReconState reconState;
 	
-	public KMMAcctID            acctID;
-	public KMMPyeID             pyeID;
+	public KMMAcctID        acctID;
+	public KMMPyeID         pyeID;
 	
 	public KMyMoneyAccount.Type acctType;
 	
@@ -35,7 +38,7 @@ public class TransactionSplitFilter {
 	
 	// ---------------------------------------------------------------
 	
-	public TransactionSplitFilter() {
+	public TransactionSplitFilter_FP() {
 		init();
 		reset();
 	}
@@ -51,12 +54,12 @@ public class TransactionSplitFilter {
 		
 		acctType = null;
 		
-		valueFrom = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
-		valueTo   = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
+		valueFrom = UNSET_VALUE;
+		valueTo   = UNSET_VALUE;
 		valueAbs  = false;
 		
-		sharesFrom = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
-		sharesTo   = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
+		sharesFrom = UNSET_VALUE;
+		sharesTo   = UNSET_VALUE;
 		sharesAbs  = false;
 		
 		memoPart = "";
@@ -71,12 +74,12 @@ public class TransactionSplitFilter {
 
 		acctType = null;
 
-		valueFrom = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
-		valueTo   = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
+		valueFrom = UNSET_VALUE;
+		valueTo   = UNSET_VALUE;
 		valueAbs  = false;
 
-		sharesFrom = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
-		sharesTo   = new FixedPointNumber(BigDecimal.valueOf(Const.UNSET_VALUE));
+		sharesFrom = UNSET_VALUE;
+		sharesTo   = UNSET_VALUE;
 		sharesAbs  = false;
 		
 		memoPart = "";
@@ -95,7 +98,13 @@ public class TransactionSplitFilter {
 		if ( action != null ) {
 			// Pre-check first:
 			// (alternatively: call getAction() directly and catch MappingException)
+			// (Not nearly as important as in sister module, though, because here, 
+			// the values are standardized.)
 			String actionStr = ((KMyMoneyTransactionSplitImpl) splt).getActionStr();
+			if ( actionStr == null ) {
+				return false;
+			}
+
 			if ( actionStr.trim().equals("") ) {
 				return false;
 			}
@@ -151,8 +160,8 @@ public class TransactionSplitFilter {
 		if ( valueFrom.getBigDecimal().doubleValue() != Const.UNSET_VALUE ) {
 			FixedPointNumber val = splt.getValue();
 			if ( valueAbs && 
-				 val.isNegative() ) {
-				val.negate();
+				 val.compareTo(FixedPointNumber.ZERO) < 0 ) {
+				val.negate(); // mutable
 			}
 			
 			if ( val.isLessThan(valueFrom, Const.DIFF_TOLERANCE_VALUE ) ) {
@@ -163,8 +172,8 @@ public class TransactionSplitFilter {
 		if ( valueTo.getBigDecimal().doubleValue() != Const.UNSET_VALUE ) {
 			FixedPointNumber val = splt.getValue();
 			if ( valueAbs && 
-				 val.isNegative() ) {
-				val.negate();
+				 val.compareTo(FixedPointNumber.ZERO) < 0 ) {
+				val.negate(); // mutable
 			}
 			
 			if ( val.isGreaterThan(valueTo, Const.DIFF_TOLERANCE_VALUE ) ) {
@@ -177,8 +186,8 @@ public class TransactionSplitFilter {
 		if ( sharesFrom.getBigDecimal().doubleValue() != Const.UNSET_VALUE ) {
 			FixedPointNumber shr = splt.getShares();
 			if ( sharesAbs && 
-				 shr.isNegative() ) {
-				shr.negate();
+				 shr.compareTo(FixedPointNumber.ZERO) < 0 ) {
+				shr.negate(); // mutable
 			}
 			
 			if ( shr.isLessThan(sharesFrom, Const.DIFF_TOLERANCE_VALUE ) ) {
@@ -189,8 +198,8 @@ public class TransactionSplitFilter {
 		if ( sharesTo.getBigDecimal().doubleValue() != Const.UNSET_VALUE ) {
 			FixedPointNumber shr = splt.getShares();
 			if ( sharesAbs && 
-				 shr.isNegative() ) {
-				shr.negate();
+				 shr.compareTo(FixedPointNumber.ZERO) < 0 ) {
+				shr.negate(); // mutable
 			}
 			
 			if ( shr.isGreaterThan(sharesTo, Const.DIFF_TOLERANCE_VALUE ) ) {
