@@ -102,7 +102,7 @@ public class TransactionSplitFilter_BF {
 				return false;
 			}
 
-			if ( actionStr.trim().equals("") ) {
+			if ( actionStr.isBlank() ) {
 				return false;
 			}
 
@@ -218,7 +218,7 @@ public class TransactionSplitFilter_BF {
 		
 		// ---
 		
-		if ( ! memoPart.trim().equals("") ) {
+		if ( ! memoPart.isBlank() ) {
 			if ( splt.getMemo() != null ) {
 				if ( ! splt.getMemo().toLowerCase().contains(memoPart.trim().toLowerCase()) ) {
 					return false;

@@ -105,7 +105,7 @@ public class TransactionSplitFilter_FP {
 				return false;
 			}
 
-			if ( actionStr.trim().equals("") ) {
+			if ( actionStr.isBlank() ) {
 				return false;
 			}
 
@@ -209,7 +209,7 @@ public class TransactionSplitFilter_FP {
 		
 		// ---
 		
-		if ( ! memoPart.trim().equals("") ) {
+		if ( ! memoPart.isBlank() ) {
 			if ( splt.getMemo() != null ) {
 				if ( ! splt.getMemo().toLowerCase().contains(memoPart.trim().toLowerCase()) ) {
 					return false;
