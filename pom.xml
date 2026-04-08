@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.kmymoney</groupId>
 		<artifactId>kmymoney</artifactId>
-		<version>2026-03</version>
+		<version>2026-04</version>
 	</parent>
 
 	<artifactId>kmymoney-api-ext</artifactId>
