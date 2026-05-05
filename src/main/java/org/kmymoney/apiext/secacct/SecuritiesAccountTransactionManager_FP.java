@@ -34,6 +34,7 @@ import xyz.schnorxoborx.base.numbers.FixedPointNumber;
  * These methods are sort of "macros" for the low-level access functions
  * in the "API" module.
  */
+@Deprecated
 public class SecuritiesAccountTransactionManager_FP {
     
     public enum Type {
@@ -115,7 +116,8 @@ public class SecuritiesAccountTransactionManager_FP {
      * 
      * @see #genBuyStockTrx(KMyMoneyWritableFileImpl, KMMAcctID, Collection, KMMAcctID, FixedPointNumber, FixedPointNumber, LocalDate, String)
      */
-    public static KMyMoneyWritableStockBuyTransaction genBuyStockTrx(
+    @Deprecated
+	public static KMyMoneyWritableStockBuyTransaction genBuyStockTrx(
     		final KMyMoneyWritableFileImpl kmmFile,
     		final KMMAcctID stockAcctID,
     		final KMMAcctID taxFeeAcctID,
@@ -168,7 +170,8 @@ public class SecuritiesAccountTransactionManager_FP {
      * 
      * @see #genBuyStockTrx(KMyMoneyWritableFileImpl, KMMAcctID, KMMAcctID, KMMAcctID, FixedPointNumber, FixedPointNumber, FixedPointNumber, LocalDate, String)
      */
-    public static KMyMoneyWritableStockBuyTransaction genBuyStockTrx(
+    @Deprecated
+	public static KMyMoneyWritableStockBuyTransaction genBuyStockTrx(
     		final KMyMoneyWritableFileImpl kmmFile,
     		final KMMAcctID stockAcctID,
     		final Collection<AcctIDAmountFPPair> expensesAcctAmtList,
@@ -357,7 +360,8 @@ public class SecuritiesAccountTransactionManager_FP {
      * @param descr description of the transaction
      * @return a newly generated, modifiable transaction object
      */
-    public static KMyMoneyWritableStockDividendTransaction genDividDistribTrx(
+    @Deprecated
+	public static KMyMoneyWritableStockDividendTransaction genDividDistribTrx(
     		final KMyMoneyWritableFileImpl kmmFile,
     		final KMMAcctID stockAcctID,
     		final KMMAcctID incomeAcctID,
@@ -411,7 +415,8 @@ public class SecuritiesAccountTransactionManager_FP {
      * @param descr description of the transaction
      * @return a newly generated, modifiable transaction object
      */
-    public static KMyMoneyWritableStockDividendTransaction genDividDistribTrx(
+    @Deprecated
+	public static KMyMoneyWritableStockDividendTransaction genDividDistribTrx(
     		final KMyMoneyWritableFileImpl kmmFile,
     		final KMMAcctID stockAcctID,
     		final KMMAcctID incomeAcctID,
@@ -602,7 +607,8 @@ public class SecuritiesAccountTransactionManager_FP {
 
     // ---------------------------------------------------------------
     
-    public static KMyMoneyWritableStockSplitTransaction genStockSplitTrx(
+    @Deprecated
+	public static KMyMoneyWritableStockSplitTransaction genStockSplitTrx(
     		final KMyMoneyWritableFileImpl kmmFile,
     		final KMMAcctID stockAcctID,
     		final StockSplitVar var,
@@ -646,7 +652,8 @@ public class SecuritiesAccountTransactionManager_FP {
      * @see #genStockSplitTrx_nofShares(KMyMoneyWritableFileImpl, KMMAcctID, FixedPointNumber, LocalDate, String)
      * @see #genStockSplitTrx(KMyMoneyWritableFileImpl, KMMAcctID, StockSplitVar, FixedPointNumber, LocalDate, String)
      */
-    public static KMyMoneyWritableStockSplitTransaction genStockSplitTrx_factor(
+    @Deprecated
+	public static KMyMoneyWritableStockSplitTransaction genStockSplitTrx_factor(
     		final KMyMoneyWritableFileImpl kmmFile,
     		final KMMAcctID stockAcctID,
     		final FixedPointNumber factor,
@@ -780,7 +787,8 @@ public class SecuritiesAccountTransactionManager_FP {
      * @see #genStockSplitTrx_factor(KMyMoneyWritableFileImpl, KMMAcctID, FixedPointNumber, LocalDate, String)
      * @see #genStockSplitTrx(KMyMoneyWritableFileImpl, KMMAcctID, StockSplitVar, FixedPointNumber, LocalDate, String)
      */
-    public static KMyMoneyWritableStockSplitTransaction genStockSplitTrx_nofShares(
+    @Deprecated
+	public static KMyMoneyWritableStockSplitTransaction genStockSplitTrx_nofShares(
     	    final KMyMoneyWritableFileImpl kmmFile,
     	    final KMMAcctID stockAcctID,
     	    final FixedPointNumber nofAddShares, // use neg. number in case of reverse stock-split

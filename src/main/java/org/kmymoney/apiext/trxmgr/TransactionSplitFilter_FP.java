@@ -11,6 +11,7 @@ import org.kmymoney.base.basetypes.simple.KMMPyeID;
 
 import xyz.schnorxoborx.base.numbers.FixedPointNumber;
 
+@Deprecated
 public class TransactionSplitFilter_FP {
 
 	// a bit bulky, I admit...
