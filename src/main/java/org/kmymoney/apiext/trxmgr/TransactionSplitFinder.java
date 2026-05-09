@@ -32,7 +32,7 @@ public class TransactionSplitFinder {
 	// ::TODO
 	// - Have results writable?
     
-	public ArrayList<KMyMoneyTransactionSplit> find(TransactionSplitFilter_FP flt) {
+	public ArrayList<KMyMoneyTransactionSplit> find(TransactionSplitFilter_BF flt) {
 		if ( flt == null ) {
 			throw new IllegalArgumentException("argument <flt> is null");
 		}

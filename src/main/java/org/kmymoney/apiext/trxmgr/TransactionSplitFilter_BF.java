@@ -10,7 +10,7 @@ import org.kmymoney.base.basetypes.simple.KMMPyeID;
 
 public class TransactionSplitFilter_BF {
 	
-	private static final BigFraction UNSET_VALUE = BigFraction.of(Const.UNSET_VALUE_NUM, Const.UNSET_VALUE_DENOM);
+	private static final BigFraction UNSET_VALUE = Const.UNSET_VALUE_BF;
 
 	// ---------------------------------------------------------------
 
