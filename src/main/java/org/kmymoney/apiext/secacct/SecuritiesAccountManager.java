@@ -3,13 +3,12 @@ package org.kmymoney.apiext.secacct;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.numbers.fraction.BigFraction;
 import org.kmymoney.api.read.KMyMoneyAccount;
 import org.kmymoney.api.read.KMyMoneyFile;
 import org.kmymoney.base.basetypes.simple.KMMAcctID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import xyz.schnorxoborx.base.numbers.FixedPointNumber;
 
 public class SecuritiesAccountManager {
 
@@ -85,7 +84,7 @@ public class SecuritiesAccountManager {
     	
     	for ( KMyMoneyAccount acct : getShareAccts() ) {
     		if ( ! acct.isClosed() &&
-    			 acct.getBalance().isGreaterThan(FixedPointNumber.ZERO) ) {
+    			 acct.getBalanceRat().compareTo(BigFraction.ZERO) > 0 ) {
     			result.add(acct);
     		}
     	}

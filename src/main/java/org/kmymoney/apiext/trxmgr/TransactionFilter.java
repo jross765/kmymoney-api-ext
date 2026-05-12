@@ -91,8 +91,8 @@ public class TransactionFilter {
 	// ---------------------------------------------------------------
 	
 	public boolean matchesCriteria(final KMyMoneyTransaction trx,
-            					   final boolean withSplits,
-            					   final SplitLogic splitLogic) {
+								   final boolean withSplits,
+								   final SplitLogic splitLogic) {
 		return matchesCriteria(trx, true, withSplits, splitLogic);
 	}
 
@@ -120,7 +120,7 @@ public class TransactionFilter {
 					return false;
 				}
 			}
-			
+
 			if ( isDatePostedToSet() ) {
 				if ( trx.getDatePosted().isAfter(datePostedTo) ) {
 					return false;

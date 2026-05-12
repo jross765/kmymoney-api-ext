@@ -304,7 +304,7 @@ public class SecuritiesAccountTransactionManager_FP {
     		KMyMoneyWritableTransactionSplit splt3 = genTrx.createWritableSplit(expensesAcct);
     		splt3.setValue(elt.amount());
     		splt3.setShares(elt.amount());
-		// splt3.setPrice("1/1"); // completely optional
+    		// splt3.setPrice("1/1"); // completely optional
     		LOGGER.debug("genBuyStockTrx: Split 3." + counter + " to write: " + splt3.toString());
     		counter++;
     	}
@@ -318,7 +318,7 @@ public class SecuritiesAccountTransactionManager_FP {
 
     	// ---
 
-	KMyMoneyStockBuyTransactionImpl specTrxRO = null;
+    	KMyMoneyStockBuyTransactionImpl specTrxRO = null;
     	try {
     		specTrxRO = new KMyMoneyStockBuyTransactionImpl((KMyMoneyWritableTransactionImpl) genTrx);
     	} catch ( Exception exc ) {
@@ -455,7 +455,7 @@ public class SecuritiesAccountTransactionManager_FP {
     			
     	for ( AcctIDAmountFPPair elt : expensesAcctAmtList ) {
     		if ( ! elt.isNotNull() ) {
-			throw new IllegalArgumentException("element of argument <expensesAcctAmtList> is null");
+    			throw new IllegalArgumentException("element of argument <expensesAcctAmtList> is null");
     		}
     		if ( ! elt.isSet() ) {
     			throw new IllegalArgumentException("element of argument <expensesAcctAmtList> is not set");
@@ -571,7 +571,7 @@ public class SecuritiesAccountTransactionManager_FP {
     		KMyMoneyWritableTransactionSplit splt4 = genTrx.createWritableSplit(expensesAcct);
     		splt4.setValue(elt.amount());
     		splt4.setShares(elt.amount());
-		// splt4.setPrice("1/1"); // completely optional
+    		// splt4.setPrice("1/1"); // completely optional
     		LOGGER.debug("genDividDistribTrx: Split 4." + counter + " to write: " + splt4.toString());
     		counter++;
     	}
@@ -585,7 +585,7 @@ public class SecuritiesAccountTransactionManager_FP {
 
     	// ---
 
-	KMyMoneyStockDividendTransactionImpl specTrxRO = null;
+    	KMyMoneyStockDividendTransactionImpl specTrxRO = null;
     	try {
     		specTrxRO = new KMyMoneyStockDividendTransactionImpl((KMyMoneyWritableTransactionImpl) genTrx);
     	} catch ( Exception exc ) {
@@ -696,6 +696,7 @@ public class SecuritiesAccountTransactionManager_FP {
 
     	// ---
     	// Check account type
+    	
     	KMyMoneyAccount stockAcct  = kmmFile.getAccountByID(stockAcctID);
     	if ( stockAcct == null ) {
     		throw new IllegalStateException("Could not find account with that ID");

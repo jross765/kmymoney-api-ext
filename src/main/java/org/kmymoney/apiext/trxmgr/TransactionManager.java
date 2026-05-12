@@ -2,6 +2,7 @@ package org.kmymoney.apiext.trxmgr;
 
 import java.util.ArrayList;
 
+import org.apache.commons.numbers.fraction.BigFraction;
 import org.kmymoney.api.read.KMyMoneyAccount;
 import org.kmymoney.api.read.KMyMoneyTransaction;
 import org.kmymoney.api.read.KMyMoneyTransactionSplit;
@@ -10,8 +11,6 @@ import org.kmymoney.apiext.Const;
 import org.kmymoney.base.basetypes.simple.KMMTrxID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import xyz.schnorxoborx.base.numbers.FixedPointNumber;
 
 public class TransactionManager {
 	
@@ -39,9 +38,9 @@ public class TransactionManager {
 		if ( trx.getSplits().size() == 0 )
 			return false;
 		
-		FixedPointNumber sum = new FixedPointNumber();
+		BigFraction sum = BigFraction.ZERO;
 		for ( KMyMoneyTransactionSplit splt : trx.getSplits() ) {
-			sum.add(splt.getValue());
+			sum = sum.add(splt.getValueRat());
 		}
 		
 		if ( sum.abs().doubleValue() > Const.DIFF_TOLERANCE_VALUE ) {

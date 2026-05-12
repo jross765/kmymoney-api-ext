@@ -39,6 +39,7 @@ public class TransactionSplitFilter_FP {
 	
 	// ---------------------------------------------------------------
 	
+	@Deprecated
 	public TransactionSplitFilter_FP() {
 		init();
 		reset();
@@ -66,9 +67,10 @@ public class TransactionSplitFilter_FP {
 		memoPart = "";
 	}
 	
+	@Deprecated
 	public void reset() {
 		action = null;
-		reconState  = null;
+		reconState = null;
 
 		acctID.reset();
 		pyeID.reset();
@@ -88,6 +90,7 @@ public class TransactionSplitFilter_FP {
 	
 	// ---------------------------------------------------------------
 	
+	@Deprecated
 	public boolean matchesCriteria(final KMyMoneyTransactionSplit splt) {
 		
 		if ( splt == null ) {
@@ -158,7 +161,7 @@ public class TransactionSplitFilter_FP {
 		
 		// ---
 		
-		if ( valueFrom.getBigDecimal().doubleValue() != Const.UNSET_VALUE ) {
+		if ( ! valueFrom.equals(UNSET_VALUE) ) {
 			FixedPointNumber val = splt.getValue();
 			if ( valueAbs && 
 				 val.compareTo(FixedPointNumber.ZERO) < 0 ) {
@@ -170,7 +173,7 @@ public class TransactionSplitFilter_FP {
 			}
 		}
 		
-		if ( valueTo.getBigDecimal().doubleValue() != Const.UNSET_VALUE ) {
+		if ( ! valueTo.equals(UNSET_VALUE) ) {
 			FixedPointNumber val = splt.getValue();
 			if ( valueAbs && 
 				 val.compareTo(FixedPointNumber.ZERO) < 0 ) {
@@ -184,7 +187,7 @@ public class TransactionSplitFilter_FP {
 		
 		// ---
 		
-		if ( sharesFrom.getBigDecimal().doubleValue() != Const.UNSET_VALUE ) {
+		if ( ! sharesFrom.equals(UNSET_VALUE) ) {
 			FixedPointNumber shr = splt.getShares();
 			if ( sharesAbs && 
 				 shr.compareTo(FixedPointNumber.ZERO) < 0 ) {
@@ -196,7 +199,7 @@ public class TransactionSplitFilter_FP {
 			}
 		}
 		
-		if ( sharesTo.getBigDecimal().doubleValue() != Const.UNSET_VALUE ) {
+		if ( ! sharesTo.equals(UNSET_VALUE) ) {
 			FixedPointNumber shr = splt.getShares();
 			if ( sharesAbs && 
 				 shr.compareTo(FixedPointNumber.ZERO) < 0 ) {
@@ -226,6 +229,7 @@ public class TransactionSplitFilter_FP {
 	// ---------------------------------------------------------------
 	
 	@Override
+	@Deprecated
 	public String toString() {
 		return "TransactionSplitFilter [" + 
 	                 "action=" + action + ", " +

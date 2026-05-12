@@ -160,10 +160,7 @@ public class TransactionSplitFilter_BF {
 				val = val.negate(); // immutable
 			}
 			
-			// CAUTION: Will not work due to bug in BigFraction.compareTo()
-			// if ( val.compareTo(valueFrom) < 0 ) {
-			// Instead:
-			if ( valueFrom.subtract(val).compareTo(BigFraction.ZERO) > 0 ) {
+			if ( val.compareTo(valueFrom) < 0 ) {
 				return false;
 			}
 		}
@@ -175,10 +172,7 @@ public class TransactionSplitFilter_BF {
 				val = val.negate(); // immutable
 			}
 			
-			// CAUTION: Will not work due to bug in BigFraction.compareTo()
-			// if ( val.compareTo(valueTo) > 0 ) {
-			// Instead:
-			if ( valueTo.subtract(val).compareTo(BigFraction.ZERO) < 0 ) {
+			if ( val.compareTo(valueTo) > 0 ) {
 				return false;
 			}
 		}
@@ -192,10 +186,7 @@ public class TransactionSplitFilter_BF {
 				qty = qty.negate(); // immutable
 			}
 			
-			// CAUTION: Will not work due to bug in BigFraction.compareTo()
-			// if ( qty.compareTo(quantityFrom) < 0 ) {
-			// Instead:
-			if ( sharesFrom.subtract(qty).compareTo(BigFraction.ZERO) > 0 ) {
+			if ( qty.compareTo(sharesFrom) < 0 ) {
 				return false;
 			}
 		}
@@ -207,10 +198,7 @@ public class TransactionSplitFilter_BF {
 				qty = qty.negate(); // immutable
 			}
 			
-			// CAUTION: Will not work due to bug in BigFraction.compareTo()
-			// if ( qty.compareTo(quantityTo) > 0 ) {
-			// Instead:
-			if ( sharesTo.subtract(qty).compareTo(BigFraction.ZERO) < 0 ) {
+			if ( qty.compareTo(sharesTo) > 0 ) {
 				return false;
 			}
 		}
