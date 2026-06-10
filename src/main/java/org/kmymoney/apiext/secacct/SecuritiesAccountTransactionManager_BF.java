@@ -193,10 +193,14 @@ public class SecuritiesAccountTransactionManager_BF {
     	if ( expensesAcctAmtList == null ) {
     		throw new IllegalArgumentException("argument <expensesAcctAmtList> is null");
     	}
-			
-    	if ( expensesAcctAmtList.isEmpty() ) {
-    		throw new IllegalArgumentException("argument <expensesAcctAmtList> is empty");
-    	}
+
+    	// Sic, there are cases where no expenses are paid (in fiat);
+    	// e.g.: Crypto transactions (where fees are paid in crypto,
+    	// thus contained in parameter <nofStocks>).
+	// ==> The following check is commented out on purpose.
+//    	if ( expensesAcctAmtList.isEmpty() ) {
+//    		throw new IllegalArgumentException("argument <expensesAcctAmtList> is empty");
+//    	}
 			
     	for ( AcctIDAmountBFPair elt : expensesAcctAmtList ) {
     		if ( ! elt.isNotNull() ) {
@@ -440,9 +444,9 @@ public class SecuritiesAccountTransactionManager_BF {
     		throw new IllegalArgumentException("argument <expensesAcctAmtList> is null");
     	}
 
-    	// CAUTION: Yes, this actually happens in real life, e.g. with specifics 
-    	// of German tax law (Freibetrag, Kapitalausschuettung).
-    	// ==> The following check is commented out on purpose.
+    	// Sic, there are cases where no expenses are paid for a dividend,
+	// e.g. with specifics of German tax law (Freibetrag, Kapitalausschuettung).
+	// ==> The following check is commented out on purpose.
 //    	if ( expensesAcctAmtList.isEmpty() ) {
 //    	    throw new IllegalArgumentException("empty expenses account list given");
 //    	}
@@ -684,7 +688,7 @@ public class SecuritiesAccountTransactionManager_BF {
 
     	// ---
     	// Check account type
-    	
+
     	KMyMoneyAccount stockAcct  = kmmFile.getAccountByID(stockAcctID);
     	if ( stockAcct == null ) {
     		throw new IllegalStateException("Could not find account with that ID");
@@ -799,7 +803,8 @@ public class SecuritiesAccountTransactionManager_BF {
     	}
 
     	// CAUTION: Neg. no. of add. shares is allowed (reverse split)!
-//    	if ( nofAddShares.isNegative() ) {
+	// ==> The following check is commented out on purpose.
+//    	if ( nofAddShares.compareTo(BigFraction.ZERO) < 0 ) {
 //    		throw new IllegalArgumentException("negative no. of add. shares given");
 //    	}
 
