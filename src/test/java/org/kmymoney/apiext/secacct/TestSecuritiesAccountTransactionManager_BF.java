@@ -182,11 +182,11 @@ public class TestSecuritiesAccountTransactionManager_BF {
 
 		KMyMoneyTransactionSplit splt1 = specTrxRO.getStockAccountSplit();
 		assertNotEquals(null, splt1);
-		assertEquals(STOCK_ACCT_ID, splt1.getAccountID().getStdID());
+		assertEquals(STOCK_ACCT_ID, splt1.getAccountID());
 		
 		KMyMoneyTransactionSplit splt2 = specTrxRO.getOffsettingAccountSplit();
 		assertNotEquals(null, splt1);
-		assertEquals(OFFSET_ACCT_ID, splt2.getAccountID().getStdID());
+		assertEquals(OFFSET_ACCT_ID, splt2.getAccountID());
 		
 		assertNotEquals(null, specTrxRO.getExpensesSplits());
 		assertEquals(1, specTrxRO.getExpensesSplits().size());
@@ -220,7 +220,7 @@ public class TestSecuritiesAccountTransactionManager_BF {
 
 		KMyMoneyTransactionSplit splt1 = null;
 		for ( KMyMoneyTransactionSplit splt : genTrx.getSplits() ) {
-			if ( splt.getAccountID().getStdID().equals(STOCK_ACCT_ID) ) {
+			if ( splt.getAccountID().equals(STOCK_ACCT_ID) ) {
 				splt1 = splt;
 				break;
 			}
@@ -229,7 +229,7 @@ public class TestSecuritiesAccountTransactionManager_BF {
 		
 		KMyMoneyTransactionSplit splt2 = null;
 		for ( KMyMoneyTransactionSplit splt : genTrx.getSplits() ) {
-			if ( splt.getAccountID().getStdID().equals(OFFSET_ACCT_ID) ) {
+			if ( splt.getAccountID().equals(OFFSET_ACCT_ID) ) {
 				splt2 = splt;
 				break;
 			}
@@ -238,7 +238,7 @@ public class TestSecuritiesAccountTransactionManager_BF {
 		
 		KMyMoneyTransactionSplit splt3 = null;
 		for ( KMyMoneyTransactionSplit splt : genTrx.getSplits() ) {
-			if ( splt.getAccountID().getStdID().equals(BUY_EXP_ACCT_1_ID) ) {
+			if ( splt.getAccountID().equals(BUY_EXP_ACCT_1_ID) ) {
 				splt3 = splt;
 				break;
 			}
@@ -256,19 +256,19 @@ public class TestSecuritiesAccountTransactionManager_BF {
 		assertEquals(BUY_EXP_1, feeTaxBF);
 		assertEquals(BUY_GROSS_PRC, prcGrossBF);
 		
-		assertEquals(STOCK_ACCT_ID, splt1.getAccountID().getStdID());
+		assertEquals(STOCK_ACCT_ID, splt1.getAccountID());
 		assertEquals(KMyMoneyTransactionSplit.Action.BUY_SHARES, splt1.getAction());
 		assertEquals(BUY_NOF_STOCKS, splt1.getSharesRat());
 		assertEquals(BUY_NET_PRC, splt1.getValueRat());
 		assertEquals("", splt1.getMemo());
 
-		assertEquals(OFFSET_ACCT_ID, splt2.getAccountID().getStdID());
+		assertEquals(OFFSET_ACCT_ID, splt2.getAccountID());
 		assertEquals(null, splt2.getAction());
 		assertEquals(BUY_GROSS_PRC.negate(), splt2.getSharesRat());
 		assertEquals(BUY_GROSS_PRC.negate(), splt2.getValueRat());
 		assertEquals(BUY_DESCR, splt2.getMemo());
 
-		assertEquals(BUY_EXP_ACCT_1_ID, splt3.getAccountID().getStdID());
+		assertEquals(BUY_EXP_ACCT_1_ID, splt3.getAccountID());
 		assertEquals(null, splt3.getAction());
 		assertEquals(BUY_EXP_1, splt3.getSharesRat());
 		assertEquals(BUY_EXP_1, splt3.getValueRat());
@@ -319,11 +319,11 @@ public class TestSecuritiesAccountTransactionManager_BF {
 
 		KMyMoneyTransactionSplit splt1 = specTrxRO.getStockAccountSplit();
 		assertNotEquals(null, splt1);
-		assertEquals(STOCK_ACCT_ID, splt1.getAccountID().getStdID());
+		assertEquals(STOCK_ACCT_ID, splt1.getAccountID());
 		
 		KMyMoneyTransactionSplit splt2 = specTrxRO.getOffsettingAccountSplit();
 		assertNotEquals(null, splt1);
-		assertEquals(OFFSET_ACCT_ID, splt2.getAccountID().getStdID());
+		assertEquals(OFFSET_ACCT_ID, splt2.getAccountID());
 		
 		assertNotEquals(null, specTrxRO.getExpensesSplits());
 		assertEquals(2, specTrxRO.getExpensesSplits().size());
@@ -356,7 +356,7 @@ public class TestSecuritiesAccountTransactionManager_BF {
 
 		KMyMoneyTransactionSplit splt1 = null;
 		for ( KMyMoneyTransactionSplit splt : genTrx.getSplits() ) {
-			if ( splt.getAccountID().getStdID().equals(STOCK_ACCT_ID) ) {
+			if ( splt.getAccountID().equals(STOCK_ACCT_ID) ) {
 				splt1 = splt;
 				break;
 			}
@@ -365,7 +365,7 @@ public class TestSecuritiesAccountTransactionManager_BF {
 		
 		KMyMoneyTransactionSplit splt2 = null;
 		for ( KMyMoneyTransactionSplit splt : genTrx.getSplits() ) {
-			if ( splt.getAccountID().getStdID().equals(OFFSET_ACCT_ID) ) {
+			if ( splt.getAccountID().equals(OFFSET_ACCT_ID) ) {
 				splt2 = splt;
 				break;
 			}
@@ -374,7 +374,7 @@ public class TestSecuritiesAccountTransactionManager_BF {
 		
 		KMyMoneyTransactionSplit splt3 = null;
 		for ( KMyMoneyTransactionSplit splt : genTrx.getSplits() ) {
-			if ( splt.getAccountID().getStdID().equals(INCOME_ACCT_ID) ) {
+			if ( splt.getAccountID().equals(INCOME_ACCT_ID) ) {
 				splt3 = splt;
 				break;
 			}
@@ -383,7 +383,7 @@ public class TestSecuritiesAccountTransactionManager_BF {
 		
 		KMyMoneyTransactionSplit splt4 = null;
 		for ( KMyMoneyTransactionSplit splt : genTrx.getSplits() ) {
-			if ( splt.getAccountID().getStdID().equals(DIV_EXP_ACCT_1_ID) ) {
+			if ( splt.getAccountID().equals(DIV_EXP_ACCT_1_ID) ) {
 				splt4 = splt;
 				break;
 			}
@@ -392,7 +392,7 @@ public class TestSecuritiesAccountTransactionManager_BF {
 		
 		KMyMoneyTransactionSplit splt5 = null;
 		for ( KMyMoneyTransactionSplit splt : genTrx.getSplits() ) {
-			if ( splt.getAccountID().getStdID().equals(DIV_EXP_ACCT_2_ID) ) {
+			if ( splt.getAccountID().equals(DIV_EXP_ACCT_2_ID) ) {
 				splt5 = splt;
 				break;
 			}
@@ -410,7 +410,7 @@ public class TestSecuritiesAccountTransactionManager_BF {
 		assertEquals(DIV_FEETAX, feeTaxBF);
 		assertEquals(DIV_NET, divNetBF);
 		
-		assertEquals(STOCK_ACCT_ID, splt1.getAccountID().getStdID());
+		assertEquals(STOCK_ACCT_ID, splt1.getAccountID());
 		assertEquals(KMyMoneyTransactionSplit.Action.DIVIDEND, splt1.getAction());
 		assertEquals(0.0, splt1.getShares().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(0.0, splt1.getSharesRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
@@ -418,25 +418,25 @@ public class TestSecuritiesAccountTransactionManager_BF {
 		assertEquals(0.0, splt1.getValueRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals("", splt1.getMemo());
 
-		assertEquals(OFFSET_ACCT_ID, splt2.getAccountID().getStdID());
+		assertEquals(OFFSET_ACCT_ID, splt2.getAccountID());
 		assertEquals(null, splt2.getAction());
 		assertEquals(DIV_NET, splt2.getSharesRat());
 		assertEquals(DIV_NET, splt2.getValueRat());
 		assertEquals(DIV_DESCR, splt2.getMemo());
 
-		assertEquals(INCOME_ACCT_ID, splt3.getAccountID().getStdID());
+		assertEquals(INCOME_ACCT_ID, splt3.getAccountID());
 		assertEquals(null, splt3.getAction());
 		assertEquals(DIV_GROSS.negate(),        splt3.getSharesRat());
 		assertEquals(DIV_GROSS.negate(),        splt3.getValueRat());
 		assertEquals("", splt3.getMemo());
 
-		assertEquals(DIV_EXP_ACCT_1_ID, splt4.getAccountID().getStdID());
+		assertEquals(DIV_EXP_ACCT_1_ID, splt4.getAccountID());
 		assertEquals(null, splt4.getAction());
 		assertEquals(DIV_EXP_1, splt4.getSharesRat());
 		assertEquals(DIV_EXP_1, splt4.getValueRat());
 		assertEquals("", splt4.getMemo());
 
-		assertEquals(DIV_EXP_ACCT_2_ID, splt5.getAccountID().getStdID());
+		assertEquals(DIV_EXP_ACCT_2_ID, splt5.getAccountID());
 		assertEquals(null, splt5.getAction());
 		assertEquals(DIV_EXP_2, splt5.getSharesRat());
 		assertEquals(DIV_EXP_2, splt5.getValueRat());
@@ -522,7 +522,7 @@ public class TestSecuritiesAccountTransactionManager_BF {
 
 		KMyMoneyTransactionSplit splt1 = specTrxRO.getSplit();
 		assertNotEquals(null, splt1);
-		assertEquals(STOCK_ACCT_ID, splt1.getAccountID().getStdID());
+		assertEquals(STOCK_ACCT_ID, splt1.getAccountID());
 		
 		// ---
 
@@ -551,11 +551,11 @@ public class TestSecuritiesAccountTransactionManager_BF {
 
 		KMyMoneyTransactionSplit splt1 = genTrx.getSplits().get(0);
 		assertNotEquals(null, splt1);
-		assertEquals(STOCK_ACCT_ID, splt1.getAccountID().getStdID());
+		assertEquals(STOCK_ACCT_ID, splt1.getAccountID());
 		
 		// ---
 
-		assertEquals(STOCK_ACCT_ID, splt1.getAccountID().getStdID());
+		assertEquals(STOCK_ACCT_ID, splt1.getAccountID());
 		assertEquals(KMyMoneyTransactionSplit.Action.SPLIT_SHARES, splt1.getAction());
 		assertEquals(SPLT_FACTOR, splt1.getSharesRat());
 		assertEquals(SPLT_NOF_SHR_AFTER, splt1.getAccount().getBalanceRat());
