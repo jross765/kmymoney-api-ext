@@ -12,14 +12,18 @@ import org.kmymoney.api.write.KMyMoneyWritableTransaction;
 import org.kmymoney.api.write.KMyMoneyWritableTransactionSplit;
 import org.kmymoney.api.write.impl.KMyMoneyWritableFileImpl;
 import org.kmymoney.api.write.impl.KMyMoneyWritableTransactionImpl;
-import org.kmymoney.apispec.read.impl.KMyMoneyStockBuyTransactionImpl;
+import org.kmymoney.apispec.read.impl.KMyMoneyStockBuySellTransactionImpl;
 import org.kmymoney.apispec.read.impl.KMyMoneyStockDividendTransactionImpl;
 import org.kmymoney.apispec.read.impl.KMyMoneyStockSplitTransactionImpl;
+import org.kmymoney.apispec.write.KMyMoneyWritableStockBuySellTransaction;
 import org.kmymoney.apispec.write.KMyMoneyWritableStockBuyTransaction;
 import org.kmymoney.apispec.write.KMyMoneyWritableStockDividendTransaction;
+import org.kmymoney.apispec.write.KMyMoneyWritableStockSellTransaction;
 import org.kmymoney.apispec.write.KMyMoneyWritableStockSplitTransaction;
+import org.kmymoney.apispec.write.impl.KMyMoneyWritableStockBuySellTransactionImpl;
 import org.kmymoney.apispec.write.impl.KMyMoneyWritableStockBuyTransactionImpl;
 import org.kmymoney.apispec.write.impl.KMyMoneyWritableStockDividendTransactionImpl;
+import org.kmymoney.apispec.write.impl.KMyMoneyWritableStockSellTransactionImpl;
 import org.kmymoney.apispec.write.impl.KMyMoneyWritableStockSplitTransactionImpl;
 import org.kmymoney.base.basetypes.simple.KMMAcctID;
 import org.kmymoney.base.tuples.AcctIDAmountBFPair;
@@ -166,8 +170,131 @@ public class SecuritiesAccountTransactionManager_BF {
      * @return a newly generated, modifiable transaction object
      * 
      * @see #genBuyStockTrx(KMyMoneyWritableFileImpl, KMMAcctID, KMMAcctID, KMMAcctID, BigFraction, BigFraction, BigFraction, LocalDate, String)
+     * @see #genSellStockTrx(KMyMoneyWritableFileImpl, KMMAcctID, KMMAcctID, KMMAcctID, BigFraction, BigFraction, BigFraction, LocalDate, String)
+     * @see #genSellStockTrx(KMyMoneyWritableFileImpl, KMMAcctID, Collection, KMMAcctID, BigFraction, BigFraction, LocalDate, String)
      */
     public static KMyMoneyWritableStockBuyTransaction genBuyStockTrx(
+    		final KMyMoneyWritableFileImpl kmmFile,
+    		final KMMAcctID stockAcctID,
+    		final Collection<AcctIDAmountBFPair> expensesAcctAmtList,
+    		final KMMAcctID offsetAcctID,
+    		final BigFraction nofStocks,
+    		final BigFraction stockPrc,
+    		final LocalDate postDate,
+    		final String descr) {
+    	if ( nofStocks.doubleValue() <= 0.0 ) {
+    		throw new IllegalArgumentException("argument <nofStocks> is <= 0");
+    	}
+    	
+    	KMyMoneyWritableStockBuySellTransaction trx = 
+    			genBuySellStockTrxCore(kmmFile,
+    									stockAcctID, expensesAcctAmtList, offsetAcctID, 
+    									nofStocks, stockPrc,
+    									postDate, descr);
+    	
+    	return new KMyMoneyWritableStockBuyTransactionImpl((KMyMoneyWritableStockBuySellTransactionImpl) trx);
+    }
+    
+    // ---------------------------------------------------------------
+    
+    /**
+     * Generates a transaction that buys a given number of stocks  
+     * for a specific security's stock account at a given price, 
+     * and generates additional splits for taxes/fees
+     * (simple variant).
+     * 
+     * @param kmmFile KMyMoney file
+     * @param stockAcctID ID the the stock account
+     * @param taxFeeAcctID ID of the expenses account for the taxes/fees
+     * @param offsetAcctID ID of the offsetting account
+     * (the account that the gross amount will be debited to).
+     * @param nofStocks no. of stocks bought
+     * @param stockPrc stock price (net)
+     * @param taxesFees taxes/fees
+     * @param postDate post date for transaction
+     * @param descr description of the transaction
+     * @return a newly generated, modifiable transaction object
+     * 
+     * @see #genSellStockTrx(KMyMoneyWritableFileImpl, KMMAcctID, Collection, KMMAcctID, BigFraction, BigFraction, LocalDate, String)
+     */
+    public static KMyMoneyWritableStockSellTransaction genSellStockTrx(
+    		final KMyMoneyWritableFileImpl kmmFile,
+    		final KMMAcctID stockAcctID,
+    		final KMMAcctID taxFeeAcctID,
+    		final KMMAcctID offsetAcctID,
+    		final BigFraction nofStocks,
+    		final BigFraction stockPrc,
+    		final BigFraction taxesFees,
+    		final LocalDate postDate,
+    		final String descr) {
+    	Collection<AcctIDAmountBFPair> expensesAcctAmtList = new ArrayList<AcctIDAmountBFPair>();
+	
+    	if ( taxesFees == null ) {
+    	    throw new IllegalArgumentException("argument <taxesFees> is null");
+    	}
+
+    	// CAUTION: The following two: In fact, this can happen
+    	// (negative booking after cancellation / Stornobuchung)
+	// if ( taxesFees.doubleValue() <= 0.0 ) {
+	//   throw new IllegalArgumentException("argument <taxesFees> has value <= 0.0");
+	// }
+
+    	AcctIDAmountBFPair newPair = new AcctIDAmountBFPair(taxFeeAcctID, taxesFees);
+    	expensesAcctAmtList.add(newPair);
+
+    	return genSellStockTrx(kmmFile, 
+    				stockAcctID, expensesAcctAmtList, offsetAcctID, 
+    				nofStocks, stockPrc, 
+    				postDate, descr);	
+    }
+    
+    /**
+     * Generates a transaction that buys a given number of stocks
+     * for a specific security's stock account at a given price, 
+     * and generates additional splits for taxes/fees
+     * (general variant).
+     * 
+     * @param kmmFile KMyMoney file
+     * @param stockAcctID ID the the stock account
+     * @param expensesAcctAmtList list of pairs (acctID/amount)
+     * that represents all taxes / fees for this transaction
+     * (the account-IDs being the IDs of the according expenses
+     * accounts)  
+     * @param offsetAcctID ID of the offsetting account
+     * (the account that the gross amount will be debited to).
+     * @param nofStocks no. of stocks bought
+     * @param stockPrc stock price (net)
+     * @param postDate post date for transaction
+     * @param descr description of the transaction
+     * @return a newly generated, modifiable transaction object
+     * 
+     * @see #genSellStockTrx(KMyMoneyWritableFileImpl, KMMAcctID, KMMAcctID, KMMAcctID, BigFraction, BigFraction, BigFraction, LocalDate, String)
+     * @see #genBuyStockTrx(KMyMoneyWritableFileImpl, KMMAcctID, KMMAcctID, KMMAcctID, BigFraction, BigFraction, BigFraction, LocalDate, String)
+     * @see #genBuyStockTrx(KMyMoneyWritableFileImpl, KMMAcctID, Collection, KMMAcctID, BigFraction, BigFraction, LocalDate, String)
+     */
+    public static KMyMoneyWritableStockSellTransaction genSellStockTrx(
+    		final KMyMoneyWritableFileImpl kmmFile,
+    		final KMMAcctID stockAcctID,
+    		final Collection<AcctIDAmountBFPair> expensesAcctAmtList,
+    		final KMMAcctID offsetAcctID,
+    		final BigFraction nofStocks,
+    		final BigFraction stockPrc,
+    		final LocalDate postDate,
+    		final String descr) {
+    	if ( nofStocks.doubleValue() <= 0.0 ) {
+    		throw new IllegalArgumentException("argument <nofStocks> is <= 0");
+    	}
+    	
+    	KMyMoneyWritableStockBuySellTransaction trx = 
+    			genBuySellStockTrxCore(kmmFile,
+    									stockAcctID, expensesAcctAmtList, offsetAcctID, 
+    									nofStocks.negate(), stockPrc,
+    									postDate, descr);
+    	
+    	return new KMyMoneyWritableStockSellTransactionImpl((KMyMoneyWritableStockBuySellTransactionImpl) trx);
+    }
+    
+    private static KMyMoneyWritableStockBuySellTransaction genBuySellStockTrxCore(
     		final KMyMoneyWritableFileImpl kmmFile,
     		final KMMAcctID stockAcctID,
     		final Collection<AcctIDAmountBFPair> expensesAcctAmtList,
@@ -216,8 +343,10 @@ public class SecuritiesAccountTransactionManager_BF {
     		throw new IllegalArgumentException("argument <nofStocks> or <stockPrc> is null");
     	}
 		
-    	if ( nofStocks.doubleValue() <= 0.0 ) {
-    		throw new IllegalArgumentException("argument <nofStocks> is <= 0");
+    	// Sic: Here, both positive and negative values that are valid.
+    	// But not zero.
+    	if ( nofStocks.compareTo(BigFraction.ZERO) == 0 ) {
+    		throw new IllegalArgumentException("argument <nofStocks> is = 0");
     	}
 			
     	if ( stockPrc.doubleValue() <= 0.0 ) {
@@ -318,17 +447,17 @@ public class SecuritiesAccountTransactionManager_BF {
 
     	// ---
 
-    	KMyMoneyStockBuyTransactionImpl specTrxRO = null;
+    	KMyMoneyStockBuySellTransactionImpl specTrxRO = null;
     	try {
-    		specTrxRO = new KMyMoneyStockBuyTransactionImpl((KMyMoneyWritableTransactionImpl) genTrx);
+    		specTrxRO = new KMyMoneyStockBuySellTransactionImpl((KMyMoneyWritableTransactionImpl) genTrx);
     	} catch ( Exception exc ) {
         	LOGGER.error("genBuyStockTrx: Could not convert generic transaction to specialized one (1): " + genTrx.getID());
         	throw exc;
     	}
     	
-    	KMyMoneyWritableStockBuyTransaction specTrxRW = null;
+    	KMyMoneyWritableStockBuySellTransaction specTrxRW = null;
     	try {
-        	specTrxRW = new KMyMoneyWritableStockBuyTransactionImpl(specTrxRO);
+        	specTrxRW = new KMyMoneyWritableStockBuySellTransactionImpl(specTrxRO);
         	LOGGER.info("genBuyStockTrx: Generated new (specialized) Transaction: " + specTrxRW.getID());
     	} catch ( Exception exc ) {
         	LOGGER.error("genBuyStockTrx: Could not convert generic transaction to specialized one (2): " + genTrx.getID());

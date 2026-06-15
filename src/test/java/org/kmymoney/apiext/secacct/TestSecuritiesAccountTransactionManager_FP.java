@@ -26,7 +26,7 @@ import org.kmymoney.apispec.read.KMyMoneyStockSplitTransaction;
 import org.kmymoney.apispec.read.impl.KMyMoneyStockBuyTransactionImpl;
 import org.kmymoney.apispec.read.impl.KMyMoneyStockDividendTransactionImpl;
 import org.kmymoney.apispec.read.impl.KMyMoneyStockSplitTransactionImpl;
-import org.kmymoney.apispec.write.KMyMoneyWritableStockBuyTransaction;
+import org.kmymoney.apispec.write.KMyMoneyWritableStockBuySellTransaction;
 import org.kmymoney.apispec.write.KMyMoneyWritableStockDividendTransaction;
 import org.kmymoney.apispec.write.KMyMoneyWritableStockSplitTransaction;
 import org.kmymoney.base.basetypes.simple.KMMAcctID;
@@ -142,7 +142,7 @@ public class TestSecuritiesAccountTransactionManager_FP {
 	public void test01() throws Exception {
 		test01_initExpAccts();
 
-		KMyMoneyWritableStockBuyTransaction trx = 
+		KMyMoneyWritableStockBuySellTransaction trx = 
 				SecuritiesAccountTransactionManager_FP
 					.genBuyStockTrx(kmmInFile, 
 									STOCK_ACCT_ID, EXPENSES_ACCT_AMT_LIST, OFFSET_ACCT_ID,

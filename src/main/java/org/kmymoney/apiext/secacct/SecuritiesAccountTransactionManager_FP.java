@@ -14,10 +14,10 @@ import org.kmymoney.api.write.impl.KMyMoneyWritableTransactionImpl;
 import org.kmymoney.apispec.read.impl.KMyMoneyStockBuyTransactionImpl;
 import org.kmymoney.apispec.read.impl.KMyMoneyStockDividendTransactionImpl;
 import org.kmymoney.apispec.read.impl.KMyMoneyStockSplitTransactionImpl;
-import org.kmymoney.apispec.write.KMyMoneyWritableStockBuyTransaction;
+import org.kmymoney.apispec.write.KMyMoneyWritableStockBuySellTransaction;
 import org.kmymoney.apispec.write.KMyMoneyWritableStockDividendTransaction;
 import org.kmymoney.apispec.write.KMyMoneyWritableStockSplitTransaction;
-import org.kmymoney.apispec.write.impl.KMyMoneyWritableStockBuyTransactionImpl;
+import org.kmymoney.apispec.write.impl.KMyMoneyWritableStockBuySellTransactionImpl;
 import org.kmymoney.apispec.write.impl.KMyMoneyWritableStockDividendTransactionImpl;
 import org.kmymoney.apispec.write.impl.KMyMoneyWritableStockSplitTransactionImpl;
 import org.kmymoney.base.basetypes.simple.KMMAcctID;
@@ -117,7 +117,7 @@ public class SecuritiesAccountTransactionManager_FP {
      * @see #genBuyStockTrx(KMyMoneyWritableFileImpl, KMMAcctID, Collection, KMMAcctID, FixedPointNumber, FixedPointNumber, LocalDate, String)
      */
     @Deprecated
-	public static KMyMoneyWritableStockBuyTransaction genBuyStockTrx(
+	public static KMyMoneyWritableStockBuySellTransaction genBuyStockTrx(
     		final KMyMoneyWritableFileImpl kmmFile,
     		final KMMAcctID stockAcctID,
     		final KMMAcctID taxFeeAcctID,
@@ -171,7 +171,7 @@ public class SecuritiesAccountTransactionManager_FP {
      * @see #genBuyStockTrx(KMyMoneyWritableFileImpl, KMMAcctID, KMMAcctID, KMMAcctID, FixedPointNumber, FixedPointNumber, FixedPointNumber, LocalDate, String)
      */
     @Deprecated
-	public static KMyMoneyWritableStockBuyTransaction genBuyStockTrx(
+	public static KMyMoneyWritableStockBuySellTransaction genBuyStockTrx(
     		final KMyMoneyWritableFileImpl kmmFile,
     		final KMMAcctID stockAcctID,
     		final Collection<AcctIDAmountFPPair> expensesAcctAmtList,
@@ -329,9 +329,9 @@ public class SecuritiesAccountTransactionManager_FP {
         	throw exc;
     	}
     	
-    	KMyMoneyWritableStockBuyTransaction specTrxRW = null;
+    	KMyMoneyWritableStockBuySellTransaction specTrxRW = null;
     	try {
-        	specTrxRW = new KMyMoneyWritableStockBuyTransactionImpl(specTrxRO);
+        	specTrxRW = new KMyMoneyWritableStockBuySellTransactionImpl(specTrxRO);
         	LOGGER.info("genBuyStockTrx: Generated new (specialized) Transaction: " + specTrxRW.getID());
     	} catch ( Exception exc ) {
         	LOGGER.error("genBuyStockTrx: Could not convert generic transaction to specialized one (2): " + genTrx.getID());
