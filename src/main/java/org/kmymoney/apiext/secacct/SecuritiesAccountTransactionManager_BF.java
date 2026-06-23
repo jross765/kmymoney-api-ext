@@ -41,6 +41,7 @@ public class SecuritiesAccountTransactionManager_BF {
     
     public enum Type {
     	BUY_STOCK,
+    	SELL_STOCK,
     	DIVIDEND,
     	DISTRIBUTION,
     	STOCK_SPLIT
@@ -62,20 +63,21 @@ public class SecuritiesAccountTransactionManager_BF {
     // ::MAGIC
     private static BigFraction SPLIT_FACTOR_MIN = BigFraction.of(1, 20); 
     	// anything below that value is technically OK,
-        // but unplausible and thus forbidden.
+        // but implausible and thus forbidden.
     private static BigFraction SPLIT_FACTOR_MAX = BigFraction.of(20);
     	// accordingly
     
     // Notes: 
     //  - It is common to specify stock (reverse) splits by a factor (e.g., 2 for a 2-for-1 split,
     //    or 1/4 for 1-for-4 reverse split). So why use the number of add. shares? Because that
-    //    is how KMyMoney (cf. the sister project) handles things, as opposed to KMyMoney, both 
+    //    is how GnuCash handles things (cf. the sister project), as opposed to KMyMoney, both 
     //    on the data and the GUI level, and given that we want to have both projects as symmetrical 
     //    as possible, we copy that logic here, so that the user can choose between both methods.
-    //    Besides, the author has witnessed cases where the bank's statements provide wrong 
-    //    values for the factor (yes, a bank's software also has bugs), whereas the number of add. 
-    //    shares is practically always correct, given the usual bank-internal processes which
-    //    the author happens to know a thing or two about.
+    //    Besides, the author has witnessed cases where the bank's statements provide wrong or at least
+    //    misleading values for the factor (cf. comments on the methods genStockSplitTrx_factor() and
+    //    genStockSplitTrx_nofShares()), whereas the number of add. shares is practically always correct
+    //    and never misleading, given the usual bank-internal processes which the author happens to know 
+    //    a thing or two about.
     //  - As opposed to the factor above, a plausible range for the (abs.) number of additional 
     //    (to be subtracted) shares cannot as generally be specified. 
     //    E.g., European/US stocks tend to be priced above 1 EUR/USD, else they are considered penny 
@@ -294,6 +296,8 @@ public class SecuritiesAccountTransactionManager_BF {
     	return new KMyMoneyWritableStockSellTransactionImpl((KMyMoneyWritableStockBuySellTransactionImpl) trx);
     }
     
+    // ---------------------------------------------------------------
+
     private static KMyMoneyWritableStockBuySellTransaction genBuySellStockTrxCore(
     		final KMyMoneyWritableFileImpl kmmFile,
     		final KMMAcctID stockAcctID,
@@ -349,7 +353,7 @@ public class SecuritiesAccountTransactionManager_BF {
     		throw new IllegalArgumentException("argument <nofStocks> is = 0");
     	}
 			
-    	if ( stockPrc.doubleValue() <= 0.0 ) {
+    	if ( stockPrc.compareTo(BigFraction.ZERO) <= 0 ) {
     		throw new IllegalArgumentException("argument <stockPrc> is <= 0");
     	}
 	
@@ -359,13 +363,13 @@ public class SecuritiesAccountTransactionManager_BF {
     		}
     	}
 
-    	LOGGER.debug("genBuyStockTrx: Account 1 name (stock):      '" + kmmFile.getAccountByID(stockAcctID).getQualifiedName() + "'");
+    	LOGGER.debug("genBuySellStockTrxCore: Account 1 name (stock): '" + kmmFile.getAccountByID(stockAcctID).getQualifiedName() + "'");
     	int counter = 1;
     	for ( AcctIDAmountBFPair elt : expensesAcctAmtList ) {
-    		LOGGER.debug("genBuyStockTrx: Account 2." + counter + " name (expenses): '" + kmmFile.getAccountByID(elt.accountID()).getQualifiedName() + "'");
+    		LOGGER.debug("genBuySellStockTrxCore: Account 2." + counter + " name (expenses): '" + kmmFile.getAccountByID(elt.accountID()).getQualifiedName() + "'");
     		counter++;
     	}
-    	LOGGER.debug("genBuyStockTrx: Account 3 name (offsetting): '" + kmmFile.getAccountByID(offsetAcctID).getQualifiedName() + "'");
+    	LOGGER.debug("genBuySellStockTrxCore: Account 3 name (offsetting): '" + kmmFile.getAccountByID(offsetAcctID).getQualifiedName() + "'");
 
     	// ---
     	// Check account types
@@ -390,13 +394,13 @@ public class SecuritiesAccountTransactionManager_BF {
     	// ---
 
     	BigFraction amtNet = nofStocks.multiply(stockPrc); // immutable
-    	LOGGER.debug("genBuyStockTrx: Net amount: " + amtNet);
+    	LOGGER.debug("genBuySellStockTrxCore: Net amount: " + amtNet);
 
     	BigFraction amtGross = amtNet;
     	for ( AcctIDAmountBFPair elt : expensesAcctAmtList ) {
     		amtGross = amtGross.add(elt.amount()); // immutable
     	}
-    	LOGGER.debug("genBuyStockTrx: Gross amount: " + amtGross);
+    	LOGGER.debug("genBuySellStockTrxCore: Gross amount: " + amtGross);
 
     	// ---
 
@@ -414,7 +418,7 @@ public class SecuritiesAccountTransactionManager_BF {
     	// splt3.setPrice("1/1"); // completely optional
     	// This is what we actually want (cf. above):
     	splt1.setMemo(descr); // sic, only here
-    	LOGGER.debug("genBuyStockTrx: Split 1 to write: " + splt1.toString());
+    	LOGGER.debug("genBuySellStockTrxCore: Split 1 to write: " + splt1.toString());
 
     	// ---
 	
@@ -423,7 +427,7 @@ public class SecuritiesAccountTransactionManager_BF {
     	splt2.setShares(nofStocks);
     	splt2.setPrice(stockPrc); // optional (sic), but advisable
     	splt2.setAction(KMyMoneyTransactionSplit.Action.BUY_SHARES);
-    	LOGGER.debug("genBuyStockTrx: Split 2 to write: " + splt2.toString());
+    	LOGGER.debug("genBuySellStockTrxCore: Split 2 to write: " + splt2.toString());
 
     	// ---
 
@@ -434,7 +438,7 @@ public class SecuritiesAccountTransactionManager_BF {
     		splt3.setValue(elt.amount());
     		splt3.setShares(elt.amount());
     		// splt3.setPrice("1/1"); // completely optional
-    		LOGGER.debug("genBuyStockTrx: Split 3." + counter + " to write: " + splt3.toString());
+    		LOGGER.debug("genBuySellStockTrxCore: Split 3." + counter + " to write: " + splt3.toString());
     		counter++;
     	}
 
@@ -443,7 +447,7 @@ public class SecuritiesAccountTransactionManager_BF {
     	genTrx.setDatePosted(postDate);
     	genTrx.setDateEntered(LocalDate.now());
 
-    	LOGGER.info("genBuyStockTrx: Generated new (generic) Transaction: " + genTrx.getID());
+    	LOGGER.info("genBuySellStockTrxCore: Generated new (generic) Transaction: " + genTrx.getID());
 
     	// ---
 
@@ -451,16 +455,16 @@ public class SecuritiesAccountTransactionManager_BF {
     	try {
     		specTrxRO = new KMyMoneyStockBuySellTransactionImpl((KMyMoneyWritableTransactionImpl) genTrx);
     	} catch ( Exception exc ) {
-        	LOGGER.error("genBuyStockTrx: Could not convert generic transaction to specialized one (1): " + genTrx.getID());
+        	LOGGER.error("genBuySellStockTrxCore: Could not convert generic transaction to specialized one (1): " + genTrx.getID());
         	throw exc;
     	}
     	
     	KMyMoneyWritableStockBuySellTransaction specTrxRW = null;
     	try {
         	specTrxRW = new KMyMoneyWritableStockBuySellTransactionImpl(specTrxRO);
-        	LOGGER.info("genBuyStockTrx: Generated new (specialized) Transaction: " + specTrxRW.getID());
+        	LOGGER.info("genBuySellStockTrxCore: Generated new (specialized) Transaction: " + specTrxRW.getID());
     	} catch ( Exception exc ) {
-        	LOGGER.error("genBuyStockTrx: Could not convert generic transaction to specialized one (2): " + genTrx.getID());
+        	LOGGER.error("genBuySellStockTrxCore: Could not convert generic transaction to specialized one (2): " + genTrx.getID());
         	throw exc;
     	}
     	
@@ -490,16 +494,16 @@ public class SecuritiesAccountTransactionManager_BF {
      * @return a newly generated, modifiable transaction object
      */
     public static KMyMoneyWritableStockDividendTransaction genDividDistribTrx(
-    		final KMyMoneyWritableFileImpl kmmFile,
-    		final KMMAcctID stockAcctID,
-    		final KMMAcctID incomeAcctID,
-    		final KMMAcctID taxFeeAcctID,
-    		final KMMAcctID offsetAcctID,
-    	    final KMyMoneyTransactionSplit.Action spltAct,
-    		final BigFraction divDistrGross,
-    		final BigFraction taxesFees,
-    		final LocalDate postDate,
-    		final String descr) {
+		final KMyMoneyWritableFileImpl kmmFile,
+		final KMMAcctID stockAcctID,
+		final KMMAcctID incomeAcctID,
+		final KMMAcctID taxFeeAcctID,
+		final KMMAcctID offsetAcctID,
+		final KMyMoneyTransactionSplit.Action spltAct,
+		final BigFraction divDistrGross,
+		final BigFraction taxesFees,
+		final LocalDate postDate,
+		final String descr) {
     	Collection<AcctIDAmountBFPair> expensesAcctAmtList = new ArrayList<AcctIDAmountBFPair>();
 	
     	if ( taxesFees == null ) {
@@ -544,15 +548,15 @@ public class SecuritiesAccountTransactionManager_BF {
      * @return a newly generated, modifiable transaction object
      */
     public static KMyMoneyWritableStockDividendTransaction genDividDistribTrx(
-    		final KMyMoneyWritableFileImpl kmmFile,
-    		final KMMAcctID stockAcctID,
-    		final KMMAcctID incomeAcctID,
-    		final Collection<AcctIDAmountBFPair> expensesAcctAmtList,
-    		final KMMAcctID offsetAcctID,
-    	    final KMyMoneyTransactionSplit.Action spltAct,
-    		final BigFraction divDistrGross,
-    		final LocalDate postDate,
-    		final String descr) {
+		final KMyMoneyWritableFileImpl kmmFile,
+		final KMMAcctID stockAcctID,
+		final KMMAcctID incomeAcctID,
+		final Collection<AcctIDAmountBFPair> expensesAcctAmtList,
+		final KMMAcctID offsetAcctID,
+		final KMyMoneyTransactionSplit.Action spltAct,
+		final BigFraction divDistrGross,
+		final LocalDate postDate,
+		final String descr) {
     	if ( kmmFile == null ) {
     		throw new IllegalArgumentException("argument <kmmFile> is null");
     	}
@@ -599,8 +603,8 @@ public class SecuritiesAccountTransactionManager_BF {
     	//   throw new IllegalArgumentException("argument <divDistrGross> has value <= 0.0");
     	// }
     	// Instead:
-    	if ( divDistrGross.doubleValue() == 0.0 ) {
-    		throw new IllegalArgumentException("argument <divDistrGross> has value = 0.0");
+    	if ( divDistrGross.compareTo(BigFraction.ZERO) == 0 ) {
+    		throw new IllegalArgumentException("argument <divDistrGross> has value = 0");
     	}
 
     	//	for ( AcctIDAmountPair elt : expensesAcctAmtList ) {
@@ -609,8 +613,8 @@ public class SecuritiesAccountTransactionManager_BF {
     	//	    }
     	//	}
 
-    	LOGGER.debug("genDividDistribTrx: Account 1 name (stock):      '" + kmmFile.getAccountByID(stockAcctID).getQualifiedName() + "'");
-    	LOGGER.debug("genDividDistribTrx: Account 2 name (income):     '" + kmmFile.getAccountByID(incomeAcctID).getQualifiedName() + "'");
+    	LOGGER.debug("genDividDistribTrx: Account 1 name (stock): '" + kmmFile.getAccountByID(stockAcctID).getQualifiedName() + "'");
+    	LOGGER.debug("genDividDistribTrx: Account 2 name (income): '" + kmmFile.getAccountByID(incomeAcctID).getQualifiedName() + "'");
     	int counter = 1;
     	for ( AcctIDAmountBFPair elt : expensesAcctAmtList ) {
     		LOGGER.debug("genDividDistribTrx: Account 3." + counter + " name (expenses): '" + kmmFile.getAccountByID(elt.accountID()).getQualifiedName() + "'");
@@ -766,11 +770,13 @@ public class SecuritiesAccountTransactionManager_BF {
      * In english-speaking countries, people tend to say "3-for-1" ("3 new shares for 1 old share") 
      * when they mean a threefold-increase of the stocks, whereas in Germany, e.g., it tends
      * to be the other way round, i.e. "Aktiensplit 1:4" ("eine alte zu 4 neuen Aktien") is a 
-     * "4-for-1" split).
+     * "4-for-1" split), or even worse: "Aktiensplit 1:3" when they actually mean a factor
+     * of 4 (sic). One might think that traders and bank personnel from continental Europe
+     * did not have maths in school...
      * 
      * Also, please be aware that KMyMoney uses the former logic internally, but the latter 
      * logic on the GUI (i.e., a 2-for-1 split (factor 2) is saved as "2/1" in the KMyMoney
-     * file, but the GUI will show "1/2").
+     * file, but the GUI will show "1/2" -- just to confuse...).
      * @param postDate
      * @param descr
      * @return a new share-(reverse-)split transaction
@@ -807,12 +813,12 @@ public class SecuritiesAccountTransactionManager_BF {
     	// ::TODO: Reconsider: Should we really reject the input and throw an exception 
     	// (which is kind of overly strict), or shouldn't we rather just issue a warning?
     	if ( factor.compareTo(SPLIT_FACTOR_MIN) < 0 ) {
-    		throw new IllegalArgumentException("argument <factor> has unplausible value (smaller than " + SPLIT_FACTOR_MIN + ")");
+    		throw new IllegalArgumentException("argument <factor> has implausible value (smaller than " + SPLIT_FACTOR_MIN + ")");
     	}
 
     	// ::TODO: cf. above
     	if ( factor.compareTo(SPLIT_FACTOR_MAX) > 0 ) {
-    		throw new IllegalArgumentException("argument <factor> has unplausible value (greater than " + SPLIT_FACTOR_MAX + ")");
+    		throw new IllegalArgumentException("argument <factor> has implausible value (greater than " + SPLIT_FACTOR_MAX + ")");
     	}
 
     	// ---
@@ -900,8 +906,9 @@ public class SecuritiesAccountTransactionManager_BF {
      * then you have 25 shares left, i.e. the number of shares as decreased by a factor
      * of 1/4 (1-for-4). 
      * 
-     * Also, please be aware that KMyMoney does <b>not</b> use the factor-logic, neither internally
-     * nor on the GUI.
+     * Also, please be aware that KMyMoney uses the former logic internally, but the latter 
+     * logic on the GUI (i.e., a 2-for-1 split (factor 2) is saved as "2/1" in the KMyMoney
+     * file, but the GUI will show "1/2" -- just to confuse...).
      * @param postDate
      * @param descr
      * @return a new share-(reverse-)split transaction
@@ -910,11 +917,11 @@ public class SecuritiesAccountTransactionManager_BF {
      * @see #genStockSplitTrx(KMyMoneyWritableFileImpl, KMMAcctID, StockSplitVar, BigFraction, LocalDate, String)
      */
     public static KMyMoneyWritableStockSplitTransaction genStockSplitTrx_nofShares(
-    	    final KMyMoneyWritableFileImpl kmmFile,
-    	    final KMMAcctID stockAcctID,
-    	    final BigFraction nofAddShares, // use neg. number in case of reverse stock-split
-    	    final LocalDate postDate,
-    	    final String descr) {
+		final KMyMoneyWritableFileImpl kmmFile,
+		final KMMAcctID stockAcctID,
+		final BigFraction nofAddShares, // use neg. number in case of reverse stock-split
+		final LocalDate postDate,
+		final String descr) {
     	if ( kmmFile == null ) {
     		throw new IllegalArgumentException("argument <kmmFile> is null");
     	}
@@ -946,12 +953,12 @@ public class SecuritiesAccountTransactionManager_BF {
     	// ::TODO: Reconsider: Should we really reject the input and throw an exception 
     	// (which is kind of overly strict), or shouldn't we rather just issue a warning?
     	if ( nofAddSharesAbs.compareTo(SPLIT_NOF_ADD_SHARES_MIN) < 0 ) {
-    		throw new IllegalArgumentException("argument <nofAddShares> has unplausible value (abs. smaller than " + SPLIT_NOF_ADD_SHARES_MIN + ")");
+    		throw new IllegalArgumentException("argument <nofAddShares> has implausible value (abs. smaller than " + SPLIT_NOF_ADD_SHARES_MIN + ")");
     	}
 
     	// ::TODO: Cf. above
     	if ( nofAddSharesAbs.compareTo(SPLIT_NOF_ADD_SHARES_MAX) > 0 ) {
-    		throw new IllegalArgumentException("argument <nofAddShares> has unplausible value (abs. greater than " + SPLIT_NOF_ADD_SHARES_MAX + ")");
+    		throw new IllegalArgumentException("argument <nofAddShares> has implausible value (abs. greater than " + SPLIT_NOF_ADD_SHARES_MAX + ")");
     	}
 
     	// CAUTION: Yes, it actually *is* possible that the no. of add. shares
