@@ -416,7 +416,7 @@ public class SecuritiesAccountTransactionManager_BF {
     	KMyMoneyWritableTransactionSplit splt1 = genTrx.createWritableSplit(offsetAcct);
     	splt1.setValue(amtGross.negate());
     	splt1.setShares(amtGross.negate());
-    	// splt3.setPrice("1/1"); // completely optional
+    	// splt3.setPrice(BigFraction.ONE); // completely optional
     	// This is what we actually want (cf. above):
     	splt1.setMemo(descr); // sic, only here
     	LOGGER.debug("genBuySellStockTrxCore: Split 1 to write: " + splt1.toString());
@@ -439,7 +439,7 @@ public class SecuritiesAccountTransactionManager_BF {
     		KMyMoneyWritableTransactionSplit splt3 = genTrx.createWritableSplit(expensesAcct);
     		splt3.setValue(elt.amount());
     		splt3.setShares(elt.amount());
-    		// splt3.setPrice("1/1"); // completely optional
+    		// splt3.setPrice(BigFraction.ONE); // completely optional
     		LOGGER.debug("genBuySellStockTrxCore: Split 3." + counter + " to write: " + splt3.toString());
     		counter++;
     	}
@@ -676,7 +676,7 @@ public class SecuritiesAccountTransactionManager_BF {
     	splt1.setValue(BigFraction.ZERO);
     	splt1.setShares(BigFraction.ZERO);
     	splt1.setAction(KMyMoneyTransactionSplit.Action.DIVIDEND);
-    	// splt1.setPrice("1/1"); // completely optional
+    	// splt1.setPrice(BigFraction.ONE); // completely optional
     	LOGGER.debug("genDividDistribTrx: Split 1 to write: " + splt1.toString());
 
     	// ---
@@ -684,7 +684,7 @@ public class SecuritiesAccountTransactionManager_BF {
     	KMyMoneyWritableTransactionSplit splt2 = genTrx.createWritableSplit(offsetAcct);
     	splt2.setValue(divDistrNet);
     	splt2.setShares(divDistrNet);
-    	// splt2.setPrice("1/1"); // completely optional
+    	// splt2.setPrice(BigFraction.ONE); // completely optional
     	// This is what we actually want (cf. above):
     	splt2.setMemo(descr); // sic, only here
     	LOGGER.debug("genDividDistribTrx: Split 2 to write: " + splt2.toString());
@@ -694,7 +694,7 @@ public class SecuritiesAccountTransactionManager_BF {
     	KMyMoneyWritableTransactionSplit splt3 = genTrx.createWritableSplit(incomeAcct);
     	splt3.setValue(divDistrGross.negate());
     	splt3.setShares(divDistrGross.negate());
-    	// splt3.setPrice("1/1"); // completely optional
+    	// splt3.setPrice(BigFraction.ONE); // completely optional
     	LOGGER.debug("genDividDistribTrx: Split 3 to write: " + splt3.toString());
 
     	// ---
@@ -705,7 +705,7 @@ public class SecuritiesAccountTransactionManager_BF {
     		KMyMoneyWritableTransactionSplit splt4 = genTrx.createWritableSplit(expensesAcct);
     		splt4.setValue(elt.amount());
     		splt4.setShares(elt.amount());
-    		// splt4.setPrice("1/1"); // completely optional
+    		// splt4.setPrice(BigFraction.ONE); // completely optional
     		LOGGER.debug("genDividDistribTrx: Split 4." + counter + " to write: " + splt4.toString());
     		counter++;
     	}
@@ -864,7 +864,7 @@ public class SecuritiesAccountTransactionManager_BF {
     	KMyMoneyWritableTransactionSplit splt = genTrx.createWritableSplit(stockAcct);
     	splt.setValue(BigFraction.ZERO);
     	splt.setShares(factor);
-		// splt.setPrice("1/1"); // completely optional
+		// splt.setPrice(BigFraction.ONE); // completely optional
     	splt.setAction(KMyMoneyTransactionSplit.Action.SPLIT_SHARES);
     	splt.setMemo(descr);
     	LOGGER.debug("genStockSplitTrx_factor: Split 1 to write: " + splt.toString());

@@ -210,7 +210,6 @@ public class TestSecuritiesAccountTransactionManager_BF {
 
 		assertEquals(BUY_DATE_POSTED, genTrx.getDatePosted());
 		// .
-		assertEquals(0.0, genTrx.getBalance().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(0.0, genTrx.getBalanceRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		// .
 		assertEquals(3, genTrx.getSplits().size());
@@ -346,7 +345,6 @@ public class TestSecuritiesAccountTransactionManager_BF {
 
 		assertEquals(DIV_DATE_POSTED, genTrx.getDatePosted());
 		// .
-		assertEquals(0.0, genTrx.getBalance().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(0.0, genTrx.getBalanceRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		// .
 		assertEquals(5, genTrx.getSplits().size());
@@ -412,9 +410,7 @@ public class TestSecuritiesAccountTransactionManager_BF {
 		
 		assertEquals(STOCK_ACCT_ID, splt1.getAccountID());
 		assertEquals(KMyMoneyTransactionSplit.Action.DIVIDEND, splt1.getAction());
-		assertEquals(0.0, splt1.getShares().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(0.0, splt1.getSharesRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
-		assertEquals(0.0, splt1.getValue().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(0.0, splt1.getValueRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals("", splt1.getMemo());
 
@@ -541,7 +537,6 @@ public class TestSecuritiesAccountTransactionManager_BF {
 
 		assertEquals(SPLT_DATE_POSTED, genTrx.getDatePosted());
 		// .
-		assertEquals(0.0, genTrx.getBalance().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(0.0, genTrx.getBalanceRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		// .
 		assertEquals(1, genTrx.getSplits().size());
@@ -559,7 +554,6 @@ public class TestSecuritiesAccountTransactionManager_BF {
 		assertEquals(KMyMoneyTransactionSplit.Action.SPLIT_SHARES, splt1.getAction());
 		assertEquals(SPLT_FACTOR, splt1.getSharesRat());
 		assertEquals(SPLT_NOF_SHR_AFTER, splt1.getAccount().getBalanceRat());
-		assertEquals(0.0, splt1.getValue().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(0.0, splt1.getValueRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(SPLT_DESCR, splt1.getMemo());
 	}
