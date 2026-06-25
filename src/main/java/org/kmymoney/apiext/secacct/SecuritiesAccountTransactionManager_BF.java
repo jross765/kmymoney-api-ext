@@ -184,7 +184,7 @@ public class SecuritiesAccountTransactionManager_BF {
     		final BigFraction stockPrc,
     		final LocalDate postDate,
     		final String descr) {
-    	if ( nofStocks.doubleValue() <= 0.0 ) {
+    	if ( nofStocks.compareTo(BigFraction.ZERO) <= 0 ) {
     		throw new IllegalArgumentException("argument <nofStocks> is <= 0");
     	}
     	
@@ -200,7 +200,7 @@ public class SecuritiesAccountTransactionManager_BF {
     // ---------------------------------------------------------------
     
     /**
-     * Generates a transaction that buys a given number of stocks  
+     * Generates a transaction that sells a given number of stocks  
      * for a specific security's stock account at a given price, 
      * and generates additional splits for taxes/fees
      * (simple variant).
@@ -251,7 +251,7 @@ public class SecuritiesAccountTransactionManager_BF {
     }
     
     /**
-     * Generates a transaction that buys a given number of stocks
+     * Generates a transaction that sells a given number of stocks
      * for a specific security's stock account at a given price, 
      * and generates additional splits for taxes/fees
      * (general variant).
@@ -283,7 +283,7 @@ public class SecuritiesAccountTransactionManager_BF {
     		final BigFraction stockPrc,
     		final LocalDate postDate,
     		final String descr) {
-    	if ( nofStocks.doubleValue() <= 0.0 ) {
+    	if ( nofStocks.compareTo(BigFraction.ZERO) <= 0 ) {
     		throw new IllegalArgumentException("argument <nofStocks> is <= 0");
     	}
     	
@@ -387,8 +387,9 @@ public class SecuritiesAccountTransactionManager_BF {
     	}
 
     	KMyMoneyAccount offsetAcct = kmmFile.getAccountByID(offsetAcctID);
-    	if ( offsetAcct.getType() != KMyMoneyAccount.Type.CHECKING ) {
-    		throw new IllegalArgumentException("Account with ID " + offsetAcctID + " is not of type " + KMyMoneyAccount.Type.CHECKING);
+    	if ( offsetAcct.getType() != KMyMoneyAccount.Type.CHECKING &&
+    		 offsetAcct.getType() != KMyMoneyAccount.Type.ASSET ) {
+    		throw new IllegalArgumentException("Account with ID " + offsetAcctID + " is not of type " + KMyMoneyAccount.Type.CHECKING + " or " + KMyMoneyAccount.Type.ASSET);
     	}
 
     	// ---
@@ -426,6 +427,7 @@ public class SecuritiesAccountTransactionManager_BF {
     	splt2.setValue(amtNet);
     	splt2.setShares(nofStocks);
     	splt2.setPrice(stockPrc); // optional (sic), but advisable
+    	// Sic, no distinction of cases (as opposed to sister proejct):
     	splt2.setAction(KMyMoneyTransactionSplit.Action.BUY_SHARES);
     	LOGGER.debug("genBuySellStockTrxCore: Split 2 to write: " + splt2.toString());
 
@@ -643,8 +645,9 @@ public class SecuritiesAccountTransactionManager_BF {
     	}
 	
     	KMyMoneyAccount offsetAcct = kmmFile.getAccountByID(offsetAcctID);
-    	if ( offsetAcct.getType() != KMyMoneyAccount.Type.CHECKING ) {
-    		throw new IllegalArgumentException("Account with ID " + offsetAcctID + " is not of type " + KMyMoneyAccount.Type.CHECKING);
+    	if ( offsetAcct.getType() != KMyMoneyAccount.Type.CHECKING &&
+       		 offsetAcct.getType() != KMyMoneyAccount.Type.ASSET ) {
+    		throw new IllegalArgumentException("Account with ID " + offsetAcctID + " is not of type " + KMyMoneyAccount.Type.CHECKING + " or " + KMyMoneyAccount.Type.ASSET);
     	}
 
     	// ---
