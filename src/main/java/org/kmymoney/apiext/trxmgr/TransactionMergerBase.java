@@ -17,7 +17,8 @@ public abstract class TransactionMergerBase {
 	
 	public enum Var {
 		VAR_1,
-		VAR_2
+		VAR_2,
+		VAR_3
 	}
 	
     // Logger
@@ -71,10 +72,10 @@ public abstract class TransactionMergerBase {
 			return false;
 		}
 		
-		if ( ! trxMgr.isSane(dier) ) {
-			LOGGER.warn("plausiCheck: Dier-transaction is not sane");
-			return false;
-		}
+//		if ( ! trxMgr.isSane(dier) ) {
+//			LOGGER.warn("plausiCheck: Dier-transaction is not sane");
+//			return false;
+//		}
 		
 		if ( ! ( trxMgr.hasSplitBoundToAccounttType(survivor, KMyMoneyAccount.Type.CHECKING) &&
 			     trxMgr.hasSplitBoundToAccounttType(dier, KMyMoneyAccount.Type.CHECKING) 
@@ -224,5 +225,5 @@ public abstract class TransactionMergerBase {
 		
 		return true;
 	}
-    
+	
 }

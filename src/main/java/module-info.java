@@ -10,6 +10,7 @@ module kmymoney.apiext {
 	requires transitive kmymoney.base;
 	requires transitive kmymoney.api;
 	requires transitive kmymoney.apispec;
+	requires org.apache.commons.text;
 
 	// ----------------------------
 
