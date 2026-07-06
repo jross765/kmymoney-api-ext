@@ -17,9 +17,29 @@ import org.slf4j.LoggerFactory;
 public class TransactionMergerVar3 extends TransactionMergerBase
 								   implements IFTransactionMerger 
 {
-    // Logger
+
+	// Logger
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionMergerVar3.class);
     
+    // ---------------------------------------------------------------
+    // ::MAGIC
+    
+	private static final String DOCTYPE_MATCH       = "<!DOCTYPE MATCH>";
+	private static final String CONTAINER_OPEN_TAG  = "<CONTAINER>";
+    private static final String CONTAINER_CLOSE_TAG = "</CONTAINER>";
+
+	private static final String OPEN_BRACKET_CODE   = "&#60;";
+	private static final String CLOSE_BRACKET_CODE  = "&#10;";
+	
+	// ----------------------------
+
+	static final String KMM_MATCHED_TX          = "kmm-matched-tx";
+	static final String KMM_MATCH_SPLIT         = "kmm-match-split";
+	
+	static final String KMM_ORIG_PAYEE          = "kmm-orig-payee";
+	static final String KMM_ORIG_NOT_RECONCILED = "kmm-orig-not-reconciled";
+	static final String KMM_ORIG_MEMO           = "kmm-orig-memo";
+
     // ---------------------------------------------------------------
     
 	// CAUTION: 
@@ -176,7 +196,7 @@ public class TransactionMergerVar3 extends TransactionMergerBase
 		LOGGER.info("merge: Transaction Split " + zDierTrxBankSpltID + " copied to new Splt " + zSurvBankTrxSpltAfter.getID());
 		
 		KMyMoneyWritableTransactionSplit zSurvBankTrxSpltBefore = kmmFile.getWritableTransactionSplitByID(zSurvTrxBankSpltBeforeID);
-		survTrx.remove(zSurvBankTrxSpltBefore);
+		survTrx.removeSplit(zSurvBankTrxSpltBefore);
 		LOGGER.info("merge: Removed Transaction Split " + zSurvTrxBankSpltBeforeID);
 		
 		// Sic: Because in KMyMoney, the split-IDs have semantics, and KMyMoney would not 
@@ -196,23 +216,23 @@ public class TransactionMergerVar3 extends TransactionMergerBase
 	
 	// ::MAGIC
 	static String getDierKMMContainerString(final KMyMoneyTransaction trx, final boolean removeID) {
-		String result = "<!DOCTYPE MATCH>";
-		result += "<CONTAINER>";
+		String result = DOCTYPE_MATCH;
+		result += CONTAINER_OPEN_TAG;
 		result += getDierKMMXMLString(trx, removeID);
-		result += "</CONTAINER>";
+		result += CONTAINER_CLOSE_TAG;
 		
 		return result;
 	}
 
 	// ::MAGIC
 	private static String getDierKMMXMLString(final KMyMoneyTransaction trx, final boolean removeID) {
-		String origStr = trx.toXMLString(); // multi-line string
+		String origStr = trx.toXMLString(); // multi-line string; first line is XML header
 		String[] lines = origStr.split("\n");
 		
 		if ( removeID )
 			lines[1] = lines[1].replaceAll("id=\"T[0-9]*\"", "id=\"\""); // remove trx ID from second line
 		
-		String result = String.join("\n", Arrays.copyOfRange(lines, 1, lines.length)); // remove first line
+		String result = String.join("\n", Arrays.copyOfRange(lines, 1, lines.length)); // remove first line (XML header)
 		result = result.replace("\n", ""); // remove all other newline chars
 		
 		return result;
@@ -221,11 +241,19 @@ public class TransactionMergerVar3 extends TransactionMergerBase
 	// ::MAGIC
 	static String getDierKMMContainerEscapedString(final KMyMoneyTransaction trx, final boolean removeID) {
 		String result = getDierKMMContainerString(trx, removeID);
-		result = result.replaceAll("<", "&#60;").replaceAll(">", ">&#10;"); // sic
+		
+		// 1) The part that I (more or less) understand.
+		//    Notice that there are two "layers" of encoding "<" and ">".
+		result = result
+					.replaceAll("<", OPEN_BRACKET_CODE)
+					.replaceAll(">", ">" + CLOSE_BRACKET_CODE); // sic: notice asymmetry
 		result = StringEscapeUtils.escapeXml11(result);
-		result = result.replaceAll("&gt;&amp;#10;", "&gt;&#10;"); // sic
-		result = "&#10;" + result; // sic
-		result = result.replaceAll(";&#10;$", ";"); // sic
+		
+		// 2) Now some magic that I don't understand.
+		//    Very ugly, but it works.
+		result = result.replaceAll("&gt;&amp;#10;", "&gt;" + CLOSE_BRACKET_CODE); // make asymmetry from above even worse
+		result = CLOSE_BRACKET_CODE + result; // add s.t. to beginning of string (and yes, it's a *closing* code!)
+		result = result.replaceAll(";" + CLOSE_BRACKET_CODE + "$", ";"); // remove s.t. from end of string 
 		
 		return result;
 	}
@@ -235,48 +263,48 @@ public class TransactionMergerVar3 extends TransactionMergerBase
 	private KMyMoneyWritableTransactionSplit copyBankTrxSplt() {
 		KMyMoneyWritableTransactionSplit copy = survTrx.createWritableSplit(zDierTrxBankSplt.getAccount());
 
-		copy.addUserDefinedAttribute("kmm-matched-tx", getDierKMMContainerEscapedString(dierTrx, true));
-		copy.addUserDefinedAttribute("kmm-match-split", zDierTrxBankSplt.getID().toString());
+		copy.addUserDefinedAttribute(KMM_MATCHED_TX, getDierKMMContainerEscapedString(dierTrx, true));
+		copy.addUserDefinedAttribute(KMM_MATCH_SPLIT, zDierTrxBankSplt.getID().toString());
 		
 		if ( zDierTrxBankSplt.getAction() != null )
-			copy.setAction(zDierTrxBankSplt.getAction());
+			copy.setAction( zDierTrxBankSplt.getAction() );
 		
-		copy.setAccountID(zSurvTrxBankSpltBefore.getAccountID());
+		copy.setAccountID( zSurvTrxBankSpltBefore.getAccountID() );
 		
-		copy.setValue(zDierTrxBankSplt.getValueRat());
-		copy.setShares(zDierTrxBankSplt.getSharesRat());
+		copy.setValue( zDierTrxBankSplt.getValueRat() );
+		copy.setShares( zDierTrxBankSplt.getSharesRat() );
 		
 		if ( zDierTrxBankSplt.getNumber() != null ) {
 			 if ( ! zDierTrxBankSplt.getNumber().isBlank() )
-				 copy.setNumber(zDierTrxBankSplt.getNumber());
+				 copy.setNumber( zDierTrxBankSplt.getNumber() );
 		}
 
-		if ( zDierTrxBankSplt.getPayee() != null ) {
-			copy.addUserDefinedAttribute("kmm-orig-payee", zDierTrxBankSplt.getPayee().toString());
-			copy.setPayee(zDierTrxBankSplt.getPayee());
+		if ( zDierTrxBankSplt.getPayeeID() != null ) {
+			copy.addUserDefinedAttribute(KMM_ORIG_PAYEE, zDierTrxBankSplt.getPayeeID().toString());
+			copy.setPayeeID( zDierTrxBankSplt.getPayeeID() );
 		} else {
-			copy.addUserDefinedAttribute("kmm-orig-payee", "dummy"); // ::TOOD
+			copy.addUserDefinedAttribute(KMM_ORIG_PAYEE, "dummy"); // ::TODO
 		}
 		
 		if ( zDierTrxBankSplt.getReconState() != null ) {
 			if ( zDierTrxBankSplt.getReconState() == KMyMoneyTransactionSplit.ReconState.RECONCILED )
-				copy.addUserDefinedAttribute("kmm-orig-not-reconciled", "no"); // sic, *not* reconciled
+				copy.addUserDefinedAttribute(KMM_ORIG_NOT_RECONCILED, "no"); // sic, *not* reconciled
 			else
-				copy.addUserDefinedAttribute("kmm-orig-not-reconciled", "yes"); // cf. above
-			copy.setReconState(zDierTrxBankSplt.getReconState());
+				copy.addUserDefinedAttribute(KMM_ORIG_NOT_RECONCILED, "yes"); // cf. above
+			copy.setReconState( zDierTrxBankSplt.getReconState() );
 		} else {
-			copy.addUserDefinedAttribute("kmm-orig-not-reconciled", "yes");
+			copy.addUserDefinedAttribute(KMM_ORIG_NOT_RECONCILED, "yes");
 		}
 		
 		if ( zDierTrxBankSplt.getMemo() != null ) {
 			if ( ! zDierTrxBankSplt.getMemo().isBlank() ) {
-				copy.addUserDefinedAttribute("kmm-orig-memo", zDierTrxBankSplt.getMemo());
-				copy.setMemo(zDierTrxBankSplt.getMemo());
+				copy.addUserDefinedAttribute(KMM_ORIG_MEMO, zDierTrxBankSplt.getMemo());
+				copy.setMemo( zDierTrxBankSplt.getMemo() );
 			} else {
-				copy.addUserDefinedAttribute("kmm-orig-memo", "dummy"); // ::TOOD
+				copy.addUserDefinedAttribute(KMM_ORIG_MEMO, "dummy"); // ::TODO
 			}
 		} else {
-			copy.addUserDefinedAttribute("kmm-orig-memo", "dummy"); // ::TOOD
+			copy.addUserDefinedAttribute(KMM_ORIG_MEMO, "dummy"); // ::TODO
 		}
 		
 		// User-defined attributes

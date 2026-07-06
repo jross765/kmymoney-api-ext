@@ -1,6 +1,5 @@
 package org.kmymoney.apiext.trxmgr;
 
-import org.kmymoney.api.read.KMyMoneyTransaction;
 import org.kmymoney.api.write.KMyMoneyWritableFile;
 import org.kmymoney.api.write.KMyMoneyWritableTransaction;
 import org.kmymoney.base.basetypes.simple.KMMTrxID;
@@ -22,13 +21,15 @@ public class TransactionMergerVar1 extends TransactionMergerBase
     
     // ---------------------------------------------------------------
     
+	@Override
 	public void merge(KMMTrxID survivorID, KMMTrxID dierID) throws MergePlausiCheckException {
-		KMyMoneyTransaction survivor = kmmFile.getTransactionByID(survivorID);
+		KMyMoneyWritableTransaction survivor = kmmFile.getWritableTransactionByID(survivorID);
 		KMyMoneyWritableTransaction dier = kmmFile.getWritableTransactionByID(dierID);
 		merge(survivor, dier);
 	}
 
-	public void merge(KMyMoneyTransaction survivor, KMyMoneyWritableTransaction dier) throws MergePlausiCheckException {
+	@Override
+	public void merge(KMyMoneyWritableTransaction survivor, KMyMoneyWritableTransaction dier) throws MergePlausiCheckException {
 		// 1) Perform plausi checks
 		if ( ! plausiCheck(survivor, dier) ) {
 			LOGGER.error("merge: survivor-dier-pair did not pass plausi check: " + survivor.getID() + "/" + dier.getID());
