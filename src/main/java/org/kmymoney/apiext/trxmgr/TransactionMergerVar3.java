@@ -10,6 +10,7 @@ import org.kmymoney.api.write.KMyMoneyWritableTransaction;
 import org.kmymoney.api.write.KMyMoneyWritableTransactionSplit;
 import org.kmymoney.api.write.impl.KMyMoneyWritableTransactionSplitImpl;
 import org.kmymoney.base.basetypes.complex.KMMQualifSpltID;
+import org.kmymoney.base.basetypes.simple.KMMPyeID;
 import org.kmymoney.base.basetypes.simple.KMMTrxID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,9 +37,11 @@ public class TransactionMergerVar3 extends TransactionMergerBase
 	static final String KMM_MATCHED_TX          = "kmm-matched-tx";
 	static final String KMM_MATCH_SPLIT         = "kmm-match-split";
 	
+	static final String KMM_ORIG_POSTDATE       = "kmm-orig-postdate";
 	static final String KMM_ORIG_PAYEE          = "kmm-orig-payee";
-	static final String KMM_ORIG_NOT_RECONCILED = "kmm-orig-not-reconciled";
 	static final String KMM_ORIG_MEMO           = "kmm-orig-memo";
+	static final String KMM_ORIG_ONE_SPLIT      = "kmm-orig-onesplit";
+	static final String KMM_ORIG_NOT_RECONCILED = "kmm-orig-not-reconciled";
 
     // ---------------------------------------------------------------
     
@@ -78,6 +81,8 @@ public class TransactionMergerVar3 extends TransactionMergerBase
 	
 	private KMMQualifSpltID zDierTrxBankSpltID = null;       // cf. above
 	private KMMQualifSpltID zSurvTrxBankSpltBeforeID = null; // dto.
+	
+	private boolean postDateFromDierTrx = false;
 
     // ---------------------------------------------------------------
 	
@@ -126,6 +131,16 @@ public class TransactionMergerVar3 extends TransactionMergerBase
     
 	public void setDierTrx(KMyMoneyWritableTransaction trx) {
 		this.dierTrx = trx;
+	}
+    
+	// ---
+	
+	public boolean isPostDateFromDierTrxSet() {
+		return postDateFromDierTrx;
+	}
+    
+	public void setPostDateFromDierTrx(boolean val) {
+		postDateFromDierTrx = val;
 	}
     
     // ---------------------------------------------------------------
@@ -206,7 +221,7 @@ public class TransactionMergerVar3 extends TransactionMergerBase
 		// Call the "secret" method written for this particular case only
 		// (and not to be used anywhere else!)
 		((KMyMoneyWritableTransactionSplitImpl) zSurvBankTrxSpltAfter).replaceID(zSurvTrxBankSpltBeforeID.getSplitID());
-
+		
 		KMMTrxID dierID = dier.getID();
 		kmmFile.removeTransaction(dier);
 		LOGGER.info("merge: Transaction " + dierID + " (dier) removed");
@@ -261,57 +276,122 @@ public class TransactionMergerVar3 extends TransactionMergerBase
     // ---------------------------------------------------------------
 	
 	private KMyMoneyWritableTransactionSplit copyBankTrxSplt() {
+		boolean origOneSplit = ( survTrx.getSplitsCount() == 1 ); // *Before* copy is generated
+		
 		KMyMoneyWritableTransactionSplit copy = survTrx.createWritableSplit(zDierTrxBankSplt.getAccount());
 
-		copy.addUserDefinedAttribute(KMM_MATCHED_TX, getDierKMMContainerEscapedString(dierTrx, true));
+		// ---
+		
 		copy.addUserDefinedAttribute(KMM_MATCH_SPLIT, zDierTrxBankSplt.getID().toString());
+		copy.addUserDefinedAttribute(KMM_MATCHED_TX, getDierKMMContainerEscapedString(dierTrx, true));
+		
+		// ---
 		
 		if ( zDierTrxBankSplt.getAction() != null )
 			copy.setAction( zDierTrxBankSplt.getAction() );
 		
+		// ---
+		
 		copy.setAccountID( zSurvTrxBankSpltBefore.getAccountID() );
+		
+		// ---
 		
 		copy.setValue( zDierTrxBankSplt.getValueRat() );
 		copy.setShares( zDierTrxBankSplt.getSharesRat() );
 		
+		// ---
+		
 		if ( zDierTrxBankSplt.getNumber() != null ) {
-			 if ( ! zDierTrxBankSplt.getNumber().isBlank() )
-				 copy.setNumber( zDierTrxBankSplt.getNumber() );
+			copy.setNumber( zDierTrxBankSplt.getNumber() );
 		}
 
-		if ( zDierTrxBankSplt.getPayeeID() != null ) {
-			copy.addUserDefinedAttribute(KMM_ORIG_PAYEE, zDierTrxBankSplt.getPayeeID().toString());
-			copy.setPayeeID( zDierTrxBankSplt.getPayeeID() );
+		// ---
+
+		// This flag is always set in KMyMoney for merging.
+		// We just want to be able to set it explicitly.
+		if ( postDateFromDierTrx ) {
+			copy.addUserDefinedAttribute(KMM_ORIG_POSTDATE, survTrx.getDatePosted().toString() );
+			survTrx.setDatePosted( dierTrx.getDatePosted() );
+		}
+
+		// ---
+		
+		if ( zSurvTrxBankSpltBefore.getPayeeID() != null ) {
+			copy.addUserDefinedAttribute(KMM_ORIG_PAYEE, zSurvTrxBankSpltBefore.getPayeeID().toString());
 		} else {
-			copy.addUserDefinedAttribute(KMM_ORIG_PAYEE, "dummy"); // ::TODO
+			copy.addUserDefinedAttribute(KMM_ORIG_PAYEE, "dummy");
+			((KMyMoneyWritableTransactionSplitImpl) copy).setUserDefinedAttribute(KMM_ORIG_PAYEE, "", true);
 		}
 		
-		if ( zDierTrxBankSplt.getReconState() != null ) {
-			if ( zDierTrxBankSplt.getReconState() == KMyMoneyTransactionSplit.ReconState.RECONCILED )
-				copy.addUserDefinedAttribute(KMM_ORIG_NOT_RECONCILED, "no"); // sic, *not* reconciled
-			else
-				copy.addUserDefinedAttribute(KMM_ORIG_NOT_RECONCILED, "yes"); // cf. above
-			copy.setReconState( zDierTrxBankSplt.getReconState() );
+		if ( zDierTrxBankSplt.getPayeeID() != null ) {
+			copy.setPayeeID( zDierTrxBankSplt.getPayeeID() );
 		} else {
-			copy.addUserDefinedAttribute(KMM_ORIG_NOT_RECONCILED, "yes");
+			copy.setPayeeID( new KMMPyeID() );
+		}
+		
+		// ---
+		
+		if ( zSurvTrxBankSpltBefore.getMemo() != null ) {
+			copy.addUserDefinedAttribute(KMM_ORIG_MEMO, zSurvTrxBankSpltBefore.getMemo());
+		} else {
+			copy.addUserDefinedAttribute(KMM_ORIG_MEMO, "dummy");
+			((KMyMoneyWritableTransactionSplitImpl) copy).setUserDefinedAttribute(KMM_ORIG_MEMO, "", true);
 		}
 		
 		if ( zDierTrxBankSplt.getMemo() != null ) {
-			if ( ! zDierTrxBankSplt.getMemo().isBlank() ) {
-				copy.addUserDefinedAttribute(KMM_ORIG_MEMO, zDierTrxBankSplt.getMemo());
-				copy.setMemo( zDierTrxBankSplt.getMemo() );
-			} else {
-				copy.addUserDefinedAttribute(KMM_ORIG_MEMO, "dummy"); // ::TODO
-			}
+			copy.setMemo( zDierTrxBankSplt.getMemo() );
 		} else {
-			copy.addUserDefinedAttribute(KMM_ORIG_MEMO, "dummy"); // ::TODO
+			copy.setMemo("");
 		}
 		
-		// User-defined attributes
-		// ::TODO
-//		for ( String attrKey : zdTrxBankSplt.getUserDefinedAttributeKeys() ) {
-//			newBankTrxSplt.addUserDefinedAttribute( zdTrxBankSplt.getUserDefinedAttribute(attrKey) );
-//		}
+		// ---
+		
+		if ( origOneSplit ) {
+			copy.addUserDefinedAttribute(KMM_ORIG_ONE_SPLIT, "yes");
+//		} else {
+			// Actually; in the other case, no "no" is generated,
+			// but the property is simply not set. That's how
+			// KMyMoney does it.
+//			copy.addUserDefinedAttribute(KMM_ORIG_ONE_SPLIT, "no");
+		}
+		
+		// ---
+		
+		if ( zSurvTrxBankSpltBefore.getReconState() != null ) {
+			if ( zSurvTrxBankSpltBefore.getReconState() != KMyMoneyTransactionSplit.ReconState.RECONCILED ) {
+				copy.addUserDefinedAttribute(KMM_ORIG_NOT_RECONCILED, "yes"); // sic, *not* reconciled
+			} else {
+				// Actually; in the other case, no "no" is generated,
+				// but the property is simply not set. That's how
+				// KMyMoney does it.
+				copy.addUserDefinedAttribute(KMM_ORIG_NOT_RECONCILED, "no"); // cf. above
+			}
+		} else {
+			// Should not happen -- just in case
+			copy.addUserDefinedAttribute(KMM_ORIG_NOT_RECONCILED, "yes");
+		}
+		
+		if ( zDierTrxBankSplt.getReconState() != null ) {
+			copy.setReconState( zDierTrxBankSplt.getReconState() );
+		} else {
+			copy.setReconState( KMyMoneyTransactionSplit.ReconState.NOT_RECONCILED );
+		}
+		
+		// ---
+		
+		if ( zDierTrxBankSplt.getUserDefinedAttributeKeys() != null ) {
+			for ( String attrKey : zDierTrxBankSplt.getUserDefinedAttributeKeys() ) {
+				if ( copy.getUserDefinedAttributeKeys() != null ) {
+					if ( copy.getUserDefinedAttributeKeys().contains(attrKey) ) {
+						copy.setUserDefinedAttribute( attrKey, zDierTrxBankSplt.getUserDefinedAttribute(attrKey) );
+					} else {
+						copy.addUserDefinedAttribute( attrKey, zDierTrxBankSplt.getUserDefinedAttribute(attrKey) );
+					}
+				} else {
+					copy.addUserDefinedAttribute( attrKey, zDierTrxBankSplt.getUserDefinedAttribute(attrKey) );
+				}
+			} // for
+		}
 		
 		return copy;
 	}

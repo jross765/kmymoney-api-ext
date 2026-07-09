@@ -4,6 +4,7 @@ import org.kmymoney.api.read.KMyMoneyTransactionSplit;
 import org.kmymoney.api.write.KMyMoneyWritableFile;
 import org.kmymoney.api.write.KMyMoneyWritableTransaction;
 import org.kmymoney.api.write.KMyMoneyWritableTransactionSplit;
+import org.kmymoney.api.write.impl.KMyMoneyWritableTransactionSplitImpl;
 import org.kmymoney.base.basetypes.complex.KMMQualifSpltID;
 import org.kmymoney.base.basetypes.simple.KMMTrxID;
 import org.slf4j.Logger;
@@ -53,6 +54,8 @@ public class TransactionMergerVar2 extends TransactionMergerBase
 	
 	private KMMQualifSpltID zDierTrxBankSpltID = null;       // cf. above
 	private KMMQualifSpltID zSurvTrxBankSpltBeforeID = null; // dto.
+	
+	private boolean postDateFromDierTrx = false;
 
     // ---------------------------------------------------------------
 	
@@ -101,6 +104,16 @@ public class TransactionMergerVar2 extends TransactionMergerBase
     
 	public void setDierTrx(KMyMoneyWritableTransaction trx) {
 		this.dierTrx = trx;
+	}
+    
+	// ---
+	
+	public boolean isPostDateFromDierTrxSet() {
+		return postDateFromDierTrx;
+	}
+    
+	public void setPostDateFromDierTrx(boolean val) {
+		postDateFromDierTrx = val;
 	}
     
     // ---------------------------------------------------------------
@@ -173,6 +186,17 @@ public class TransactionMergerVar2 extends TransactionMergerBase
 		KMyMoneyWritableTransactionSplit zSurvBankTrxSpltBefore = kmmFile.getWritableTransactionSplitByID(zSurvTrxBankSpltBeforeID);
 		survTrx.removeSplit(zSurvBankTrxSpltBefore);
 		LOGGER.info("merge: Removed Transaction Split " + zSurvTrxBankSpltBeforeID);
+		
+		// Sic: Because in KMyMoney, the split-IDs have semantics, and KMyMoney would not 
+		// handle the whole transaction as expected when the split no. S0001 
+		// (often zSurvTrxBankSpltBefore's ID) is missing.
+		// Not so in the sister project.
+		// Call the "secret" method written for this particular case only
+		// (and not to be used anywhere else!)
+		((KMyMoneyWritableTransactionSplitImpl) zSurvBankTrxSpltAfter).replaceID(zSurvTrxBankSpltBeforeID.getSplitID());
+		
+		if ( postDateFromDierTrx )
+			survTrx.setDatePosted( dierTrx.getDatePosted() );
 
 		KMMTrxID dierID = dier.getID();
 		kmmFile.removeTransaction(dier);
@@ -192,24 +216,29 @@ public class TransactionMergerVar2 extends TransactionMergerBase
 		copy.setValue(zDierTrxBankSplt.getValueRat());
 		copy.setShares(zDierTrxBankSplt.getSharesRat());
 		
-		if ( zDierTrxBankSplt.getNumber() != null )
-			copy.setNumber(zDierTrxBankSplt.getNumber());
+		if ( zDierTrxBankSplt.getNumber() != null ) {
+			copy.setNumber( zDierTrxBankSplt.getNumber() );
+		}
 
-		// ::TODO ::CHECK
-//		if ( zDierTrxBankSplt.getPayee() != null )
-//			copy.setPayee(zDierTrxBankSplt.getPayee());
-		
 		if ( zDierTrxBankSplt.getReconState() != null )
 			copy.setReconState(zDierTrxBankSplt.getReconState());
 		
 		if ( zDierTrxBankSplt.getMemo() != null )
 			copy.setMemo(zDierTrxBankSplt.getMemo());
-		
-		// User-defined attributes
-		// ::TODO
-//		for ( String attrKey : zdTrxBankSplt.getUserDefinedAttributeKeys() ) {
-//			newBankTrxSplt.addUserDefinedAttribute( zdTrxBankSplt.getUserDefinedAttribute(attrKey) );
-//		}
+
+		if ( zDierTrxBankSplt.getUserDefinedAttributeKeys() != null ) {
+			for ( String attrKey : zDierTrxBankSplt.getUserDefinedAttributeKeys() ) {
+				if ( copy.getUserDefinedAttributeKeys() != null ) {
+					if ( copy.getUserDefinedAttributeKeys().contains(attrKey) ) {
+						copy.setUserDefinedAttribute( attrKey, zDierTrxBankSplt.getUserDefinedAttribute(attrKey) );
+					} else {
+						copy.addUserDefinedAttribute( attrKey, zDierTrxBankSplt.getUserDefinedAttribute(attrKey) );
+					}
+				} else {
+					copy.addUserDefinedAttribute( attrKey, zDierTrxBankSplt.getUserDefinedAttribute(attrKey) );
+				}
+			} // for
+		}
 		
 		return copy;
 	}
