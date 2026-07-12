@@ -259,7 +259,7 @@ public class TestSecuritiesAccountTransactionManager_FP {
 		assertEquals(KMyMoneyTransactionSplit.Action.BUY_SHARES, splt1.getAction());
 		assertEquals(BUY_NOF_STOCKS, splt1.getShares());
 		assertEquals(BUY_NET_PRC, splt1.getValue());
-		assertEquals("", splt1.getMemo());
+		assertEquals(null, splt1.getMemo());
 
 		assertEquals(OFFSET_ACCT_ID, splt2.getAccountID());
 		assertEquals(null, splt2.getAction());
@@ -271,7 +271,7 @@ public class TestSecuritiesAccountTransactionManager_FP {
 		assertEquals(null, splt3.getAction());
 		assertEquals(BUY_EXP_1, splt3.getShares());
 		assertEquals(BUY_EXP_1, splt3.getValue());
-		assertEquals("", splt3.getMemo());
+		assertEquals(null, splt3.getMemo());
 	}
 
 	@Test
@@ -412,7 +412,7 @@ public class TestSecuritiesAccountTransactionManager_FP {
 		assertEquals(KMyMoneyTransactionSplit.Action.DIVIDEND, splt1.getAction());
 		assertEquals(0.0, splt1.getShares().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(0.0, splt1.getValue().doubleValue(), ConstTest.DIFF_TOLERANCE);
-		assertEquals("", splt1.getMemo());
+		assertEquals(null, splt1.getMemo());
 
 		assertEquals(OFFSET_ACCT_ID, splt2.getAccountID());
 		assertEquals(null, splt2.getAction());
@@ -424,19 +424,19 @@ public class TestSecuritiesAccountTransactionManager_FP {
 		assertEquals(null, splt3.getAction());
 		assertEquals(DIV_GROSS.copy().negate(), splt3.getShares());
 		assertEquals(DIV_GROSS.copy().negate(), splt3.getValue());
-		assertEquals("", splt3.getMemo());
+		assertEquals(null, splt3.getMemo());
 
 		assertEquals(DIV_EXP_ACCT_1_ID, splt4.getAccountID());
 		assertEquals(null, splt4.getAction());
 		assertEquals(DIV_EXP_1, splt4.getShares());
 		assertEquals(DIV_EXP_1, splt4.getValue());
-		assertEquals("", splt4.getMemo());
+		assertEquals(null, splt4.getMemo());
 
 		assertEquals(DIV_EXP_ACCT_2_ID, splt5.getAccountID());
 		assertEquals(null, splt5.getAction());
 		assertEquals(DIV_EXP_2, splt5.getShares());
 		assertEquals(DIV_EXP_2, splt5.getValue());
-		assertEquals("", splt5.getMemo());
+		assertEquals(null, splt5.getMemo());
 	}
 
 	@Test

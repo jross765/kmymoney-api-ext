@@ -10,7 +10,6 @@ import org.kmymoney.api.write.KMyMoneyWritableTransaction;
 import org.kmymoney.api.write.KMyMoneyWritableTransactionSplit;
 import org.kmymoney.api.write.impl.KMyMoneyWritableTransactionSplitImpl;
 import org.kmymoney.base.basetypes.complex.KMMQualifSpltID;
-import org.kmymoney.base.basetypes.simple.KMMPyeID;
 import org.kmymoney.base.basetypes.simple.KMMTrxID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -287,8 +286,13 @@ public class TransactionMergerVar3 extends TransactionMergerBase
 		
 		// ---
 		
-		if ( zDierTrxBankSplt.getAction() != null )
+		if ( zDierTrxBankSplt.getAction() != null ) {
 			copy.setAction( zDierTrxBankSplt.getAction() );
+		} else {
+			// if ( copy.getAction() != null ) { // unnecessary
+				copy.unsetAction();
+			// }
+		}
 		
 		// ---
 		
@@ -303,6 +307,12 @@ public class TransactionMergerVar3 extends TransactionMergerBase
 		
 		if ( zDierTrxBankSplt.getNumber() != null ) {
 			copy.setNumber( zDierTrxBankSplt.getNumber() );
+		}
+
+		// ---
+		
+		if ( zDierTrxBankSplt.getBankID() != null ) {
+			copy.setBankID( zDierTrxBankSplt.getBankID() );
 		}
 
 		// ---
@@ -326,7 +336,9 @@ public class TransactionMergerVar3 extends TransactionMergerBase
 		if ( zDierTrxBankSplt.getPayeeID() != null ) {
 			copy.setPayeeID( zDierTrxBankSplt.getPayeeID() );
 		} else {
-			copy.setPayeeID( new KMMPyeID() );
+			if ( copy.getPayeeID() != null ) { // sic, necessary
+				copy.unsetPayeeID();
+			}
 		}
 		
 		// ---

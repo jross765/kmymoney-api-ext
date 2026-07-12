@@ -82,7 +82,7 @@ public class TestTransactionMergerVar3 {
 					<SPLIT id="S0001" payee="" reconciledate="" action="" reconcileflag="1" value="4127/100" shares="4127/100" price="0/1" memo="fdjfduajqqyanmjzlkyl&#10;Zins/Dividende" account="A000060" number="" bankid="A000060-2026-06-10-7f8c8d0-1">
 						<KEYVALUEPAIRS>
 							<PAIR key="kmm-match-split" value="S0001"/>
-							<PAIR key="kmm-matched-tx" value="&#10;&amp;#60;!DOCTYPE MATCH&gt;&#10;&amp;#60;CONTAINER&gt;&#10;&amp;#60;TRANSACTION id=&quot;&quot; postdate=&quot;2026-06-10&quot; memo=&quot;Zins/Dividende&quot; entrydate=&quot;2026-06-24&quot; commodity=&quot;EUR&quot;&gt;&#10;&amp;#60;SPLITS&gt;&#10;&amp;#60;SPLIT id=&quot;S0001&quot; payee=&quot;&quot; reconciledate=&quot;&quot; action=&quot;&quot; reconcileflag=&quot;2&quot; value=&quot;4127/100&quot; shares=&quot;4127/100&quot; price=&quot;0/1&quot; memo=&quot;Zins/Dividende&quot; account=&quot;A000060&quot; number=&quot;&quot; bankid=&quot;A000060-2026-06-10-7f8c8d0-1&quot;/&gt;&#10;&amp;#60;/SPLITS&gt;&#10;&amp;#60;/TRANSACTION&gt;&#10;&amp;#60;/CONTAINER&gt;"/>
+							<PAIR key="kmm-matched-tx" value="&#10;&amp;#60;!DOCTYPE MATCH&gt;&#10;&amp;#60;CONTAINER&gt;&#10;&amp;#60;TRANSACTION id=&quot;&quot; postdate=&quot;2026-06-10&quot; memo=&quot;Zins/Dividende XY1RM2AMEQG7&quot; entrydate=&quot;2026-06-24&quot; commodity=&quot;EUR&quot;&gt;&#10;&amp;#60;SPLITS&gt;&#10;&amp;#60;SPLIT id=&quot;S0001&quot; payee=&quot;&quot; reconciledate=&quot;&quot; action=&quot;&quot; reconcileflag=&quot;2&quot; value=&quot;4127/100&quot; shares=&quot;4127/100&quot; price=&quot;0/1&quot; memo=&quot;Zins/Dividende&quot; account=&quot;A000060&quot; number=&quot;&quot; bankid=&quot;A000060-2026-06-10-7f8c8d0-1&quot;/&gt;&#10;&amp;#60;/SPLITS&gt;&#10;&amp;#60;/TRANSACTION&gt;&#10;&amp;#60;/CONTAINER&gt;"/>
 							<PAIR key="kmm-orig-memo" value="fdjfduajqqyanmjzlkyl"/>
 							<PAIR key="kmm-orig-not-reconciled" value="yes"/>
 						</KEYVALUEPAIRS>
@@ -97,7 +97,7 @@ public class TestTransactionMergerVar3 {
 			""";
 
 	private static final String MERGED_TRX_1_MATCHED_TRX_STR = """
-&#10;&amp;#60;!DOCTYPE MATCH&gt;&#10;&amp;#60;CONTAINER&gt;&#10;&amp;#60;TRANSACTION id=&quot;&quot; postdate=&quot;2026-06-10&quot; memo=&quot;Zins/Dividende&quot; entrydate=&quot;2026-06-24&quot; commodity=&quot;EUR&quot;&gt;&#10;&amp;#60;SPLITS&gt;&#10;&amp;#60;SPLIT id=&quot;S0001&quot; payee=&quot;&quot; reconciledate=&quot;&quot; action=&quot;&quot; reconcileflag=&quot;2&quot; value=&quot;4127/100&quot; shares=&quot;4127/100&quot; price=&quot;0/1&quot; memo=&quot;Zins/Dividende&quot; account=&quot;A000060&quot; number=&quot;&quot; bankid=&quot;A000060-2026-06-10-7f8c8d0-1&quot;/&gt;&#10;&amp;#60;/SPLITS&gt;&#10;&amp;#60;/TRANSACTION&gt;&#10;&amp;#60;/CONTAINER&gt;""";
+&#10;&amp;#60;!DOCTYPE MATCH&gt;&#10;&amp;#60;CONTAINER&gt;&#10;&amp;#60;TRANSACTION id=&quot;&quot; postdate=&quot;2026-06-10&quot; memo=&quot;Zins/Dividende&quot; entrydate=&quot;2026-06-24&quot; commodity=&quot;EUR&quot;&gt;&#10;&amp;#60;SPLITS&gt;&#10;&amp;#60;SPLIT id=&quot;S0001&quot; payee=&quot;&quot; reconciledate=&quot;&quot; action=&quot;&quot; reconcileflag=&quot;2&quot; value=&quot;4127/100&quot; shares=&quot;4127/100&quot; price=&quot;0/1&quot; memo=&quot;Zins/Dividende XY1RM2AMEQG7&quot; account=&quot;A000060&quot; number=&quot;&quot; bankid=&quot;A000060-2026-06-10-7f8c8d0-1&quot;/&gt;&#10;&amp;#60;/SPLITS&gt;&#10;&amp;#60;/TRANSACTION&gt;&#10;&amp;#60;/CONTAINER&gt;""";
 
 	// -----------------------------------------------------------------
 
@@ -381,15 +381,19 @@ public class TestTransactionMergerVar3 {
 		String prefixStr1 = str1.replaceAll("TRANSACTION id=.*$", "");
 		// System.err.println("prefix-str1: '" + prefixStr1 + "'");
 		String prefixStr2 = str2.replaceAll("TRANSACTION id=.*$", "");
-		if ( ! prefixStr1.equals(prefixStr2) )
+		if ( ! prefixStr1.equals(prefixStr2) ) {
+			System.err.println("matchedTrxSoftEquals: Error 1");
 			return false;
+		}
 		
 		// 2) Suffix
 		String suffixStr1 = str1.replaceAll("^.*/TRANSACTION", "");
 		// System.err.println("suffix-str1: '" + suffixStr1 + "'");
 		String suffixStr2 = str2.replaceAll("^.*/TRANSACTION", "");
-		if ( ! suffixStr1.equals(suffixStr2) )
+		if ( ! suffixStr1.equals(suffixStr2) ) {
+			System.err.println("matchedTrxSoftEquals: Error 2");
 			return false;
+		}
 		
 		// 2) Core
 		int pos1 = str1.indexOf("TRANSACTION id=");
@@ -402,8 +406,12 @@ public class TestTransactionMergerVar3 {
 
 //		System.err.println("core-str1: '" + coreStr1 + "'");
 //		System.err.println("core-str2: '" + coreStr2 + "'");
-		if ( ! matchedTrxSoftEqualsCore(coreStr1, coreStr2) )
+		if ( ! matchedTrxSoftEqualsCore(coreStr1, coreStr2) ) {
+			System.err.println("matchedTrxSoftEquals: Error 3: ");
+			System.err.println("  '" + coreStr1 + "'");
+			System.err.println("  '" + coreStr2 + "'");
 			return false;
+		}
 
 		return true;
 	}
@@ -431,8 +439,12 @@ public class TestTransactionMergerVar3 {
 //		System.err.println("trx-str2: '" + trxStr2 + "'");
 		
 		// 1) Transaction w/o splits
-		if ( ! matchedTrxSoftEqualsCoreTrx(trxStr1, trxStr2) )
+		if ( ! matchedTrxSoftEqualsCoreTrx(trxStr1, trxStr2) ) {
+			System.err.println("matchedTrxSoftEqualsCore: Error 1");
+			System.err.println("  '" + trxStr1 + "'");
+			System.err.println("  '" + trxStr2 + "'");
 			return false;
+		}
 		
 		pos1 = coreStr1.indexOf("SPLITS");
 		pos2 = coreStr1.indexOf("/SPLITS");
@@ -446,8 +458,12 @@ public class TestTransactionMergerVar3 {
 //		System.err.println("splits-str1: '" + splitsStr1 + "'");
 //		System.err.println("splits-str2: '" + splitsStr2 + "'");
 
-		if ( ! matchedTrxSoftEqualsCoreMultSplt(splitsStr1, splitsStr2) )
+		if ( ! matchedTrxSoftEqualsCoreMultSplt(splitsStr1, splitsStr2) ) {
+			System.err.println("matchedTrxSoftEqualsCore: Error 1");
+			System.err.println("  '" + splitsStr1 + "'");
+			System.err.println("  '" + splitsStr2 + "'");
 			return false;
+		}
 		
 		return true;
 	}
@@ -461,21 +477,26 @@ public class TestTransactionMergerVar3 {
 		String[] arr1 = str1.split("\\|");
 		String[] arr2 = str2.split("\\|");
 		
-		// System.err.println("xxx1: " + arr1.length + " / " + arr2.length);
-		if ( arr1.length != arr2.length )
+		if ( arr1.length != arr2.length ) {
+			System.err.println("matchedTrxSoftEqualsCoreTrx: Error 1: " + arr1.length + "/" + arr2.length);
 			return false;
+		}
 		
 		Arrays.sort(arr1);
 		Arrays.sort(arr2);
 		
 		for ( int i = 0; i < arr1.length; i++ ) {
 			if ( arr1[i].endsWith("&quot") )
-				arr1[i] = arr1[i] + ";"; 
+				arr1[i] = arr1[i] + ";";
 			if ( arr2[i].endsWith("&quot") )
-				arr2[i] = arr2[i] + ";"; 
-			// System.err.println("xxx2: " + arr1[i] + " / " + arr2[i]);
+				arr2[i] = arr2[i] + ";";
+			
 			if ( ! arr1[i].equals( arr2[i] ) ) {
-				// System.err.println("xxx2-err");
+				System.err.println("matchedTrxSoftEqualsCoreTrx: Error 2/arr[" + i + "]: '" + arr1[i] + "'/'" + arr2[i] + "'");
+				System.err.println("-----");
+				printArr("arr1", arr1);
+				System.err.println("-----");
+				printArr("arr2", arr2);
 				return false;
 			}
 		}
@@ -519,8 +540,12 @@ public class TestTransactionMergerVar3 {
 //				System.err.println("splt-str1: '" + spltStr1 + "'");
 //				System.err.println("splt-str2: '" + spltStr2 + "'");
 				
-				if ( ! matchedTrxSoftEqualsCoreOneSplt(spltStr1, spltStr2) )
+				if ( ! matchedTrxSoftEqualsCoreOneSplt(spltStr1, spltStr2) ) {
+					System.err.println("matchedTrxSoftEqualsCoreMultSplt: Error 1:");
+					System.err.println("  '" + spltStr1 + "'");
+					System.err.println("  '" + spltStr2 + "'");
 					return false;
+				}
 				
 				restStr1 = restStr1.substring(pos2Str1 + "/&gt;".length());
 				restStr2 = restStr2.substring(pos2Str2 + "/&gt;".length());
@@ -542,26 +567,37 @@ public class TestTransactionMergerVar3 {
 		String[] arr1 = str1.split("\\|");
 		String[] arr2 = str2.split("\\|");
 		
-		// System.err.println("yyy1: " + arr1.length + " / " + arr2.length);
-		if ( arr1.length != arr2.length )
+		if ( arr1.length != arr2.length ) {
+			System.err.println("matchedTrxSoftEqualsCoreOneSplt: Error 1: " + arr1.length + "/" + arr2.length);
 			return false;
+		}
 		
 		Arrays.sort(arr1);
 		Arrays.sort(arr2);
 		
 		for ( int i = 0; i < arr1.length; i++ ) {
 			if ( arr1[i].endsWith("&quot") )
-				arr1[i] = arr1[i] + ";"; 
+				arr1[i] = arr1[i] + ";";
 			if ( arr2[i].endsWith("&quot") )
-				arr2[i] = arr2[i] + ";"; 
-			// System.err.println("yyy2: '" + arr1[i] + "' / '" + arr2[i] + "'");
+				arr2[i] = arr2[i] + ";";
+			
 			if ( ! arr1[i].equals( arr2[i] ) ) {
-				System.err.println("yyy2-err");
+				System.err.println("matchedTrxSoftEqualsCoreOneSplt: Error 2/arr[" + i + "]: '" + arr1[i] + "'/'" + arr2[i] + "'");
+				System.err.println("-----");
+				printArr("arr1", arr1);
+				System.err.println("-----");
+				printArr("arr2", arr2);
 				return false;
 			}
 		}
 		
 		return true;
+	}
+
+	private void printArr(String arrName, String[] arr) {
+		for ( int i = 0; i < arr.length; i++ ) {
+			System.err.println(arrName + "[" + i + "]: '" + arr[i] + "'"); 
+		}
 	}
 
 }

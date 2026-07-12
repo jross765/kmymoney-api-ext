@@ -1,0 +1,33 @@
+    <TRANSACTION id="T000000000000015084" postdate="2026-06-10" memo="Zins/Dividende" entrydate="2026-06-24" commodity="EUR">
+      <SPLITS>
+        <SPLIT id="S0001" payee="" reconciledate="" action="" reconcileflag="2" value="4127/100" shares="4127/100" price="0/1" memo="Zins/Dividende" account="A000060" number="" bankid="A000060-2026-06-10-7f8c8d0-1"/>
+      </SPLITS>
+    </TRANSACTION>
+
+    <TRANSACTION id="T000000000000015085" postdate="2026-06-15" memo="Zins/Dividende" entrydate="2026-06-24" commodity="EUR">
+      <SPLITS>
+        <SPLIT id="S0001" payee="" reconciledate="" action="" reconcileflag="2" value="1629/100" shares="1629/100" price="0/1" memo="Zins/Dividende" account="A000060" number="" bankid="A000060-2026-06-15-2ef6fa0-1"/>
+      </SPLITS>
+    </TRANSACTION>
+
+    <TRANSACTION id="T000000000000015209" postdate="2026-06-10" memo="" entrydate="2026-06-30" commodity="EUR">
+      <SPLITS>
+        <SPLIT id="S0001" payee="" reconciledate="" action="" reconcileflag="0" value="4127/100" shares="4127/100" price="0/1" memo="" account="A000060" number="" bankid=""/>
+        <SPLIT id="S0002" payee="" reconciledate="" action="Dividend" reconcileflag="0" value="0/1" shares="0/1" price="0/1" memo="" account="A000939" number="" bankid=""/>
+        <SPLIT id="S0003" payee="" reconciledate="" action="" reconcileflag="0" value="831/100" shares="831/100" price="1/1" memo="" account="A000324" number="" bankid=""/>
+        <SPLIT id="S0004" payee="" reconciledate="" action="" reconcileflag="0" value="111/20" shares="111/20" price="1/1" memo="" account="A000323" number="" bankid=""/>
+        <SPLIT id="S0005" payee="" reconciledate="" action="" reconcileflag="0" value="3/10" shares="3/10" price="1/1" memo="" account="A000321" number="" bankid=""/>
+        <SPLIT id="S0006" payee="" reconciledate="" action="" reconcileflag="0" value="-5543/100" shares="-5543/100" price="1/1" memo="" account="A000316" number="" bankid=""/>
+      </SPLITS>
+    </TRANSACTION>
+
+    <TRANSACTION id="T000000000000015210" postdate="2026-06-15" memo="" entrydate="2026-06-30" commodity="EUR">
+      <SPLITS>
+        <SPLIT id="S0001" payee="" reconciledate="" action="" reconcileflag="0" value="1629/100" shares="1629/100" price="0/1" memo="" account="A000060" number="" bankid=""/>
+        <SPLIT id="S0002" payee="" reconciledate="" action="Dividend" reconcileflag="0" value="0/1" shares="0/1" price="0/1" memo="" account="A001002" number="" bankid=""/>
+        <SPLIT id="S0003" payee="" reconciledate="" action="" reconcileflag="0" value="82/25" shares="82/25" price="1/1" memo="" account="A000324" number="" bankid=""/>
+        <SPLIT id="S0004" payee="" reconciledate="" action="" reconcileflag="0" value="219/100" shares="219/100" price="1/1" memo="" account="A000323" number="" bankid=""/>
+        <SPLIT id="S0005" payee="" reconciledate="" action="" reconcileflag="0" value="3/25" shares="3/25" price="1/1" memo="" account="A000321" number="" bankid=""/>
+        <SPLIT id="S0006" payee="" reconciledate="" action="" reconcileflag="0" value="-547/25" shares="-547/25" price="1/1" memo="" account="A000316" number="" bankid=""/>
+      </SPLITS>
+    </TRANSACTION>

@@ -259,7 +259,7 @@ public class TestSecuritiesAccountTransactionManager_BF {
 		assertEquals(KMyMoneyTransactionSplit.Action.BUY_SHARES, splt1.getAction());
 		assertEquals(BUY_NOF_STOCKS, splt1.getSharesRat());
 		assertEquals(BUY_NET_PRC, splt1.getValueRat());
-		assertEquals("", splt1.getMemo());
+		assertEquals(null, splt1.getMemo());
 
 		assertEquals(OFFSET_ACCT_ID, splt2.getAccountID());
 		assertEquals(null, splt2.getAction());
@@ -271,7 +271,7 @@ public class TestSecuritiesAccountTransactionManager_BF {
 		assertEquals(null, splt3.getAction());
 		assertEquals(BUY_EXP_1, splt3.getSharesRat());
 		assertEquals(BUY_EXP_1, splt3.getValueRat());
-		assertEquals("", splt3.getMemo());
+		assertEquals(null, splt3.getMemo());
 	}
 
 	@Test
@@ -412,7 +412,7 @@ public class TestSecuritiesAccountTransactionManager_BF {
 		assertEquals(KMyMoneyTransactionSplit.Action.DIVIDEND, splt1.getAction());
 		assertEquals(0.0, splt1.getSharesRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
 		assertEquals(0.0, splt1.getValueRat().doubleValue(), ConstTest.DIFF_TOLERANCE);
-		assertEquals("", splt1.getMemo());
+		assertEquals(null, splt1.getMemo());
 
 		assertEquals(OFFSET_ACCT_ID, splt2.getAccountID());
 		assertEquals(null, splt2.getAction());
@@ -424,19 +424,19 @@ public class TestSecuritiesAccountTransactionManager_BF {
 		assertEquals(null, splt3.getAction());
 		assertEquals(DIV_GROSS.negate(),        splt3.getSharesRat());
 		assertEquals(DIV_GROSS.negate(),        splt3.getValueRat());
-		assertEquals("", splt3.getMemo());
+		assertEquals(null, splt3.getMemo());
 
 		assertEquals(DIV_EXP_ACCT_1_ID, splt4.getAccountID());
 		assertEquals(null, splt4.getAction());
 		assertEquals(DIV_EXP_1, splt4.getSharesRat());
 		assertEquals(DIV_EXP_1, splt4.getValueRat());
-		assertEquals("", splt4.getMemo());
+		assertEquals(null, splt4.getMemo());
 
 		assertEquals(DIV_EXP_ACCT_2_ID, splt5.getAccountID());
 		assertEquals(null, splt5.getAction());
 		assertEquals(DIV_EXP_2, splt5.getSharesRat());
 		assertEquals(DIV_EXP_2, splt5.getValueRat());
-		assertEquals("", splt5.getMemo());
+		assertEquals(null, splt5.getMemo());
 	}
 
 	@Test
