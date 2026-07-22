@@ -29,7 +29,7 @@ public class TransactionMergerVar3 extends TransactionMergerBase
     private static final String CONTAINER_CLOSE_TAG = "</CONTAINER>";
 
 	private static final String OPEN_BRACKET_CODE   = "&#60;";
-	private static final String CLOSE_BRACKET_CODE  = "&#10;";
+	private static final String CLOSE_BRACKET_CODE  = "&#10;"; // = XML-line-feed (LF). ::TODO: Move to main-lib, Const
 	
 	// ----------------------------
 
@@ -41,7 +41,7 @@ public class TransactionMergerVar3 extends TransactionMergerBase
 	static final String KMM_ORIG_MEMO           = "kmm-orig-memo";
 	static final String KMM_ORIG_ONE_SPLIT      = "kmm-orig-onesplit";
 	static final String KMM_ORIG_NOT_RECONCILED = "kmm-orig-not-reconciled";
-
+	
     // ---------------------------------------------------------------
     
 	// CAUTION: 
@@ -277,42 +277,42 @@ public class TransactionMergerVar3 extends TransactionMergerBase
 	private KMyMoneyWritableTransactionSplit copyBankTrxSplt() {
 		boolean origOneSplit = ( survTrx.getSplitsCount() == 1 ); // *Before* copy is generated
 		
-		KMyMoneyWritableTransactionSplit copy = survTrx.createWritableSplit(zDierTrxBankSplt.getAccount());
+		KMyMoneyWritableTransactionSplit spltCopy = survTrx.createWritableSplit(zDierTrxBankSplt.getAccount());
 
 		// ---
 		
-		copy.addUserDefinedAttribute(KMM_MATCH_SPLIT, zDierTrxBankSplt.getID().toString());
-		copy.addUserDefinedAttribute(KMM_MATCHED_TX, getDierKMMContainerEscapedString(dierTrx, true));
+		spltCopy.addUserDefinedAttribute(KMM_MATCH_SPLIT, zDierTrxBankSplt.getID().toString());
+		spltCopy.addUserDefinedAttribute(KMM_MATCHED_TX, getDierKMMContainerEscapedString(dierTrx, true));
 		
 		// ---
 		
 		if ( zDierTrxBankSplt.getAction() != null ) {
-			copy.setAction( zDierTrxBankSplt.getAction() );
+			spltCopy.setAction( zDierTrxBankSplt.getAction() );
 		} else {
 			// if ( copy.getAction() != null ) { // unnecessary
-				copy.unsetAction();
+				spltCopy.unsetAction();
 			// }
 		}
 		
 		// ---
 		
-		copy.setAccountID( zSurvTrxBankSpltBefore.getAccountID() );
+		spltCopy.setAccountID( zSurvTrxBankSpltBefore.getAccountID() );
 		
 		// ---
 		
-		copy.setValue( zDierTrxBankSplt.getValueRat() );
-		copy.setShares( zDierTrxBankSplt.getSharesRat() );
+		spltCopy.setValue( zDierTrxBankSplt.getValueRat() );
+		spltCopy.setShares( zDierTrxBankSplt.getSharesRat() );
 		
 		// ---
 		
 		if ( zDierTrxBankSplt.getNumber() != null ) {
-			copy.setNumber( zDierTrxBankSplt.getNumber() );
+			spltCopy.setNumber( zDierTrxBankSplt.getNumber() );
 		}
 
 		// ---
 		
 		if ( zDierTrxBankSplt.getBankID() != null ) {
-			copy.setBankID( zDierTrxBankSplt.getBankID() );
+			spltCopy.setBankID( zDierTrxBankSplt.getBankID() );
 		}
 
 		// ---
@@ -320,46 +320,79 @@ public class TransactionMergerVar3 extends TransactionMergerBase
 		// This flag is always set in KMyMoney for merging.
 		// We just want to be able to set it explicitly.
 		if ( postDateFromDierTrx ) {
-			copy.addUserDefinedAttribute(KMM_ORIG_POSTDATE, survTrx.getDatePosted().toString() );
+			spltCopy.addUserDefinedAttribute(KMM_ORIG_POSTDATE, survTrx.getDatePosted().toString() );
 			survTrx.setDatePosted( dierTrx.getDatePosted() );
 		}
 
 		// ---
 		
 		if ( zSurvTrxBankSpltBefore.getPayeeID() != null ) {
-			copy.addUserDefinedAttribute(KMM_ORIG_PAYEE, zSurvTrxBankSpltBefore.getPayeeID().toString());
+			spltCopy.addUserDefinedAttribute(KMM_ORIG_PAYEE, zSurvTrxBankSpltBefore.getPayeeID().toString());
 		} else {
-			copy.addUserDefinedAttribute(KMM_ORIG_PAYEE, "dummy");
-			((KMyMoneyWritableTransactionSplitImpl) copy).setUserDefinedAttribute(KMM_ORIG_PAYEE, "", true);
+			spltCopy.addUserDefinedAttribute(KMM_ORIG_PAYEE, "dummy");
+			((KMyMoneyWritableTransactionSplitImpl) spltCopy).setUserDefinedAttribute(KMM_ORIG_PAYEE, "", true);
 		}
 		
 		if ( zDierTrxBankSplt.getPayeeID() != null ) {
-			copy.setPayeeID( zDierTrxBankSplt.getPayeeID() );
+			spltCopy.setPayeeID( zDierTrxBankSplt.getPayeeID() );
 		} else {
-			if ( copy.getPayeeID() != null ) { // sic, necessary
-				copy.unsetPayeeID();
+			if ( spltCopy.getPayeeID() != null ) { // sic, necessary
+				spltCopy.unsetPayeeID();
 			}
 		}
 		
 		// ---
 		
 		if ( zSurvTrxBankSpltBefore.getMemo() != null ) {
-			copy.addUserDefinedAttribute(KMM_ORIG_MEMO, zSurvTrxBankSpltBefore.getMemo());
+			spltCopy.addUserDefinedAttribute(KMM_ORIG_MEMO, zSurvTrxBankSpltBefore.getMemo());
 		} else {
-			copy.addUserDefinedAttribute(KMM_ORIG_MEMO, "dummy");
-			((KMyMoneyWritableTransactionSplitImpl) copy).setUserDefinedAttribute(KMM_ORIG_MEMO, "", true);
+			spltCopy.addUserDefinedAttribute(KMM_ORIG_MEMO, "dummy");
+			((KMyMoneyWritableTransactionSplitImpl) spltCopy).setUserDefinedAttribute(KMM_ORIG_MEMO, "", true);
 		}
+
+		// ---
 		
+		// Split memo
+		String combinedMemo = "";
+		// First, the dier's split comment
 		if ( zDierTrxBankSplt.getMemo() != null ) {
-			copy.setMemo( zDierTrxBankSplt.getMemo() );
-		} else {
-			copy.setMemo("");
+			if ( ! zDierTrxBankSplt.getMemo().isBlank() ) {
+				combinedMemo = zDierTrxBankSplt.getMemo();
+			}
+		}
+		// Then, add the survivor's *split* comment
+		if ( spltCopy.getMemo() != null ) { // If generated by our own tool GenDepotTrx, it *is* null.  
+			if ( ! spltCopy.getMemo().isBlank() ) {
+				combinedMemo += "\n" + spltCopy.getMemo(); // sic, "\n", not "&#10;"
+			}
+		}
+		// Finally, add the survivor's *transaction* comment.
+		// (Sic, that's the way we want it.)
+		if ( survTrx.getMemo() != null ) { // Cannot happen if generated by our own tool GenDepotTrx. Else: very well possible
+			if ( ! survTrx.getMemo().isBlank() ) { // dto.
+				combinedMemo += "\n" + survTrx.getMemo(); // cf. above
+			}
+		}
+		spltCopy.setMemo(combinedMemo);
+		
+		// Transaction memo
+		combinedMemo = "";
+		if ( dierTrx.getMemo() != null ) { // shouldn't happen under normal circumstances, as it comes from the bank; just in case...
+			if ( ! dierTrx.getMemo().isBlank() ) { // dto.
+				combinedMemo = dierTrx.getMemo();
+				if ( survTrx.getMemo() != null ) { // Cannot happen if generated by our own tool GenDepotTrx. Else: very well possible
+					if ( ! survTrx.getMemo().isBlank() ) { // dto.
+						combinedMemo += "\n" + survTrx.getMemo(); // cf. above
+					}
+				}
+				survTrx.setMemo(combinedMemo);
+			}
 		}
 		
 		// ---
 		
 		if ( origOneSplit ) {
-			copy.addUserDefinedAttribute(KMM_ORIG_ONE_SPLIT, "yes");
+			spltCopy.addUserDefinedAttribute(KMM_ORIG_ONE_SPLIT, "yes");
 //		} else {
 			// Actually; in the other case, no "no" is generated,
 			// but the property is simply not set. That's how
@@ -371,41 +404,41 @@ public class TransactionMergerVar3 extends TransactionMergerBase
 		
 		if ( zSurvTrxBankSpltBefore.getReconState() != null ) {
 			if ( zSurvTrxBankSpltBefore.getReconState() != KMyMoneyTransactionSplit.ReconState.RECONCILED ) {
-				copy.addUserDefinedAttribute(KMM_ORIG_NOT_RECONCILED, "yes"); // sic, *not* reconciled
+				spltCopy.addUserDefinedAttribute(KMM_ORIG_NOT_RECONCILED, "yes"); // sic, *not* reconciled
 			} else {
 				// Actually; in the other case, no "no" is generated,
 				// but the property is simply not set. That's how
 				// KMyMoney does it.
-				copy.addUserDefinedAttribute(KMM_ORIG_NOT_RECONCILED, "no"); // cf. above
+				spltCopy.addUserDefinedAttribute(KMM_ORIG_NOT_RECONCILED, "no"); // cf. above
 			}
 		} else {
 			// Should not happen -- just in case
-			copy.addUserDefinedAttribute(KMM_ORIG_NOT_RECONCILED, "yes");
+			spltCopy.addUserDefinedAttribute(KMM_ORIG_NOT_RECONCILED, "yes");
 		}
 		
 		if ( zDierTrxBankSplt.getReconState() != null ) {
-			copy.setReconState( zDierTrxBankSplt.getReconState() );
+			spltCopy.setReconState( zDierTrxBankSplt.getReconState() );
 		} else {
-			copy.setReconState( KMyMoneyTransactionSplit.ReconState.NOT_RECONCILED );
+			spltCopy.setReconState( KMyMoneyTransactionSplit.ReconState.NOT_RECONCILED );
 		}
 		
 		// ---
 		
 		if ( zDierTrxBankSplt.getUserDefinedAttributeKeys() != null ) {
 			for ( String attrKey : zDierTrxBankSplt.getUserDefinedAttributeKeys() ) {
-				if ( copy.getUserDefinedAttributeKeys() != null ) {
-					if ( copy.getUserDefinedAttributeKeys().contains(attrKey) ) {
-						copy.setUserDefinedAttribute( attrKey, zDierTrxBankSplt.getUserDefinedAttribute(attrKey) );
+				if ( spltCopy.getUserDefinedAttributeKeys() != null ) {
+					if ( spltCopy.getUserDefinedAttributeKeys().contains(attrKey) ) {
+						spltCopy.setUserDefinedAttribute( attrKey, zDierTrxBankSplt.getUserDefinedAttribute(attrKey) );
 					} else {
-						copy.addUserDefinedAttribute( attrKey, zDierTrxBankSplt.getUserDefinedAttribute(attrKey) );
+						spltCopy.addUserDefinedAttribute( attrKey, zDierTrxBankSplt.getUserDefinedAttribute(attrKey) );
 					}
 				} else {
-					copy.addUserDefinedAttribute( attrKey, zDierTrxBankSplt.getUserDefinedAttribute(attrKey) );
+					spltCopy.addUserDefinedAttribute( attrKey, zDierTrxBankSplt.getUserDefinedAttribute(attrKey) );
 				}
 			} // for
 		}
 		
-		return copy;
+		return spltCopy;
 	}
 
 }

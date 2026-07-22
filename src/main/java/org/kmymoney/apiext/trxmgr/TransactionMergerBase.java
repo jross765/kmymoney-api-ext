@@ -60,7 +60,7 @@ public abstract class TransactionMergerBase {
 		}
 		
 		if ( Math.abs( survDateFromJul - dierDateToJul ) > Const.DIFF_TOLERANCE_DAYS ) {
-			LOGGER.warn("plausiCheck: Survivor- and dier-transaction do not have the same post-date");
+			LOGGER.warn("plausiCheck: Survivor- and dier-transaction's post-date are more than " + Const.DIFF_TOLERANCE_DAYS + " days apart");
 			LOGGER.debug("plausiCheck: Survivor-date: " + survivor.getDatePosted());
 			LOGGER.debug("plausiCheck: Dier-date: " + dier.getDatePosted());
 			return false;

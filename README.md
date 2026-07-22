@@ -41,25 +41,36 @@ This package contains classes that help to...
 Cf. document "[Major Changes](https://github.com/jross765/JKMyMoneyLibNTools/kmymoney-api-ext/major_changes.md)".
 
 ## Planned
-* Package SecAcct: 
+It should go without saying, but the following items are of course subject to change and 
+by no means a promise that they will actually be implemented soon:
+
+* Package `SecAcct`: 
 	* More variants of buy/sell/dividend/etc. transactions, including wrappers which you provide account names to instead of account IDs.
-	* Possibly new class for high-level consistency checks of existing transactions, e.g.: All dividends of domestic shares are actually posted to the domestic dividend account.
+	* *Possibly*: New class for high-level consistency checks of existing transactions, e.g.: All dividends of domestic shares are actually posted to the domestic dividend account.
 
-* Package TrxMgr: 
-   * Add new variant for merging transactions: the one that is actually used by KMyMoney.
+* New package for accounting-macros for more complex stuff.
 
-* New package for accounting-macros, such as closing the books.
+  Currently, the author sees two candidates for this:
 
-    **Note**: Will have to re-evaluate this, because, altough equity accounts
-    (in the accounting sense of the word, not as a badly-chosen synonym for 
-    stock accounts) do exist in KMyMoney, they do not seem to be used 
-    in completely the same way as in GnuCash (it's a *personal finance* software,
-    after all...) -- "closing the books", altough technically possible, might be 
-    counter-productive here.
+  * Closing the books: This actually already has been implemented in
+    the tool `CloseBooks` (cf. module "Tools"), and the code there
+    is so simple that it's not really worth while opening a new 
+    package for it.
+
+    **Note**: See comment on this tool in the README file of module "Tools".
+
+  * Correct and efficient handling of crypto-currency transactions:
+    Actually, that one is already in the pipeline and about to undergo
+    some testing, but it's not published yet. Please be patient.
 
 * New package for management of securities and currencies (esp. bulk quote import).
 
 ## Known Issues
+* The transaction merging mechanism, variant 3 ("The KMyMoney way") is not idempotent: 
+  * Use API to load a file, merge two transactions, save that to new file, load that new file into KMyMoney 
+  &rarr; will work, i.e. KMyMoney will load the file without complaining, and you then can accept or undo the merge.
+  * First, do as above. Then, take the new file and try to merge two other transactions with the API, the same way 
+  &rarr; **will not work**, i.e. the API will not load the file, because it will complain about the first merge's split-attribute `kmm-matched-tx`.
 
 ### Package SecAcct
 * The specialized entities are built-up "manually", as the according entities' design and 
