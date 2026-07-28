@@ -65,12 +65,15 @@ by no means a promise that they will actually be implemented soon:
 
 * New package for management of securities and currencies (esp. bulk quote import).
 
+  The author actually already has written such a module as well as several tools based on it, 
+  but he cannot publish them in the current state, as they...
+  * have additional dependencies that are not generally available, and 
+  * they are too tightly embedded in and tailored to his specific 
+    working environment and needs, i.e. not general enough.
+
+  One day, when he finds some time, he might get this to-do done. Please be patient.
+
 ## Known Issues
-* The transaction merging mechanism, variant 3 ("The KMyMoney way") is not idempotent: 
-  * Use API to load a file, merge two transactions, save that to new file, load that new file into KMyMoney 
-  &rarr; will work, i.e. KMyMoney will load the file without complaining, and you then can accept or undo the merge.
-  * First, do as above. Then, take the new file and try to merge two other transactions with the API, the same way 
-  &rarr; **will not work**, i.e. the API will not load the file, because it will complain about the first merge's split-attribute `kmm-matched-tx`.
 
 ### Package SecAcct
 * The specialized entities are built-up "manually", as the according entities' design and 
@@ -78,5 +81,13 @@ by no means a promise that they will actually be implemented soon:
   to the contructor is already built -- at least to the point that the validation test passes.
 
 ### Package TrxMgr
-(Nothing)
+* The transaction merging mechanism, variant 3 ("The KMyMoney way"):
+  * It is not idempotent, i.e.:
+    * Use API to load a file, merge two transactions, save that to new file, load that new file into KMyMoney 
+      &rarr; will work, i.e. KMyMoney will load the file without complaining, and you then can accept or undo the merge.
+    * First, do as above. Then, take the new file and try to merge two other transactions with the API, the same way 
+      &rarr; **will not work**, i.e. the API will not load the file, because it will complain about the first merge's split-attribute `kmm-matched-tx`.
+  * It logic is not exactly replicated from orig. KMyMoney, but it's good enough for the
+    author's needs. Might have to re-iterate over it one day.
+
 

@@ -1,5 +1,35 @@
 # Major Changes
 
+## V. 0.9 &rarr; 0.10
+Followed the deprecation of `FixedPointNumber` in the modules
+"(Core) API", V. 0.10 and 
+"Specialized Entitites", V. 0.4: 
+
+* Deprecated everything that is `FixedPointNumber`-related (cf. previous release).
+
+* Partially changed implementations so that `BigFraction` is used internally instead of `FixedPointNumber`.
+
+* New functionality in package TrxMgr.
+
+* Usual maintenance: Fixed small bugs, small improvements, low-level code-cleaning.
+
+In more detail:
+
+* Package SecAcct: Small improvements.
+
+* Package TrxMgr: 
+  * `SecuritiesAccountTransactionManager_[BF|FP]`:
+     * Added method `genSellStockTrx()` (both variants).
+     * Used newly-introduced types `KMyMoney(Writable)Stock[Buy|Sell]Transaction`.
+     * A number of small improvements.
+
+  * Added third variant of transaction merger (the "KMyMoney-way"):
+    * `TransactionMergerVar3`: New
+    
+      Works (more or less, but not exactly) as defined by the regular 
+      KMyMoney workflow; every transaction merge of this variant has to be 
+      confirmed later by the user (using the standard GUI).
+
 ## V. 0.8 &rarr; 0.9
 Adapted to module "Base", V. 0.9 and "API Specialized Entities", V. 0.3.
 
