@@ -206,41 +206,61 @@ public class TransactionMergerVar2 extends TransactionMergerBase
     // ---------------------------------------------------------------
 	
 	private KMyMoneyWritableTransactionSplit copyBankTrxSplt() {
-		KMyMoneyWritableTransactionSplit copy = survTrx.createWritableSplit(zDierTrxBankSplt.getAccount());
+		KMyMoneyWritableTransactionSplit spltCopy = survTrx.createWritableSplit(zDierTrxBankSplt.getAccount());
 
-		if ( zDierTrxBankSplt.getAction() != null )
-			copy.setAction(zDierTrxBankSplt.getAction());
+		if ( zDierTrxBankSplt.getAction() != null ) {
+			spltCopy.setAction(zDierTrxBankSplt.getAction());
+		} else {
+			spltCopy.unsetAction();
+		}
 		
-		copy.setAccountID(zSurvTrxBankSpltBefore.getAccountID());
+		spltCopy.setAccountID(zSurvTrxBankSpltBefore.getAccountID());
 		
-		copy.setValue(zDierTrxBankSplt.getValueRat());
-		copy.setShares(zDierTrxBankSplt.getSharesRat());
+		spltCopy.setValue(zDierTrxBankSplt.getValueRat());
+		spltCopy.setShares(zDierTrxBankSplt.getSharesRat());
 		
 		if ( zDierTrxBankSplt.getNumber() != null ) {
-			copy.setNumber( zDierTrxBankSplt.getNumber() );
+			spltCopy.setNumber( zDierTrxBankSplt.getNumber() );
 		}
 
-		if ( zDierTrxBankSplt.getReconState() != null )
-			copy.setReconState(zDierTrxBankSplt.getReconState());
+		if ( zDierTrxBankSplt.getBankID() != null ) {
+			spltCopy.setBankID( zDierTrxBankSplt.getBankID() );
+		}
+
+		if ( zDierTrxBankSplt.getPayeeID() != null ) {
+			spltCopy.setPayeeID( zDierTrxBankSplt.getPayeeID() );
+		} else {
+			if ( spltCopy.getPayeeID() != null ) { // sic, necessary
+				spltCopy.unsetPayeeID();
+			}
+		}
 		
 		if ( zDierTrxBankSplt.getMemo() != null )
-			copy.setMemo(zDierTrxBankSplt.getMemo());
+			spltCopy.setMemo(zDierTrxBankSplt.getMemo());
 
+		if ( zDierTrxBankSplt.getReconState() != null ) {
+			spltCopy.setReconState(zDierTrxBankSplt.getReconState());
+		} else {
+			spltCopy.setReconState( KMyMoneyTransactionSplit.ReconState.NOT_RECONCILED );
+		}
+		 
+		// ---
+		
 		if ( zDierTrxBankSplt.getUserDefinedAttributeKeys() != null ) {
 			for ( String attrKey : zDierTrxBankSplt.getUserDefinedAttributeKeys() ) {
-				if ( copy.getUserDefinedAttributeKeys() != null ) {
-					if ( copy.getUserDefinedAttributeKeys().contains(attrKey) ) {
-						copy.setUserDefinedAttribute( attrKey, zDierTrxBankSplt.getUserDefinedAttribute(attrKey) );
+				if ( spltCopy.getUserDefinedAttributeKeys() != null ) {
+					if ( spltCopy.getUserDefinedAttributeKeys().contains(attrKey) ) {
+						spltCopy.setUserDefinedAttribute( attrKey, zDierTrxBankSplt.getUserDefinedAttribute(attrKey) );
 					} else {
-						copy.addUserDefinedAttribute( attrKey, zDierTrxBankSplt.getUserDefinedAttribute(attrKey) );
+						spltCopy.addUserDefinedAttribute( attrKey, zDierTrxBankSplt.getUserDefinedAttribute(attrKey) );
 					}
 				} else {
-					copy.addUserDefinedAttribute( attrKey, zDierTrxBankSplt.getUserDefinedAttribute(attrKey) );
+					spltCopy.addUserDefinedAttribute( attrKey, zDierTrxBankSplt.getUserDefinedAttribute(attrKey) );
 				}
 			} // for
 		}
 		
-		return copy;
+		return spltCopy;
 	}
 
 }

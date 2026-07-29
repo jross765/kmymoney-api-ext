@@ -289,7 +289,7 @@ public class TransactionMergerVar3 extends TransactionMergerBase
 		if ( zDierTrxBankSplt.getAction() != null ) {
 			spltCopy.setAction( zDierTrxBankSplt.getAction() );
 		} else {
-			// if ( copy.getAction() != null ) { // unnecessary
+			// if ( copy.getAction() != null ) { // unnecessary (cf. below)
 				spltCopy.unsetAction();
 			// }
 		}
@@ -336,7 +336,7 @@ public class TransactionMergerVar3 extends TransactionMergerBase
 		if ( zDierTrxBankSplt.getPayeeID() != null ) {
 			spltCopy.setPayeeID( zDierTrxBankSplt.getPayeeID() );
 		} else {
-			if ( spltCopy.getPayeeID() != null ) { // sic, necessary
+			if ( spltCopy.getPayeeID() != null ) { // sic, necessary, cf. above
 				spltCopy.unsetPayeeID();
 			}
 		}
