@@ -684,7 +684,7 @@ public class SecuritiesAccountTransactionManager_FP {
     	KMyMoneyWritableTransactionSplit splt1 = genTrx.createWritableSplit(stockAcct);
     	splt1.setValue(FixedPointNumber.ZERO.copy());
     	splt1.setShares(FixedPointNumber.ZERO.copy());
-    	splt1.setAction(KMyMoneyTransactionSplit.Action.DIVIDEND);
+    	splt1.setAction(spltAct);
     	// splt1.setPrice(FixedPointNumber.ONE.copy()); // completely optional
     	LOGGER.debug("genDividDistribTrx: Split 1 to write: " + splt1.toString());
 
