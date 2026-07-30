@@ -1,16 +1,22 @@
 # Technical Aspects
-The test file has been generated with 
-KMyMoney V. 5.2.1.
+The test files have been generated with 
+KMyMoney V. 5.2.2.
 
-When you change the 
-`test.kmy`
-file, please save it in *compressed* XML format (as opposed to module "API").
+When you change one of them, please save it in *compressed* XML format (as opposed to module "API (Core)").
 
 # Testing Aspects
 Please be careful when making changes on the file: All JUnit test cases of this module heavily depend on it, and you might break things.
 
+## The "Standard" Test File
+The file `test.kmy` is the "standard" test file that is used in (almost) all test cases.
+
+## The Merger Test Files
+The files `test_mrg_xyz.kmy` are written especially for testing the transaction mergers in package "TrxMgr". Currently, only variant 3 of the merger is tested with them (as it is the most complicated one of them), but the other two will follow.
+
+For more details, cf. file `test_mrg.ods`.
+
 # Comparison to Other Modules' Test Files
-This test file *originated* from the one of module "API", but it is *not identical* to it.
+This test file *originated* from the one of module "API (Core)", but it is *not identical* to it.
 
 Main differences:
 
